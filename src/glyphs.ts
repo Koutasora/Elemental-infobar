@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /**
- * Czcionki dołączone do pluginu (JetBrains Mono, Iosevka – licencja SIL OFL-1.1).
+ * Czcionki dołączone do pluginu (JetBrains Mono, Iosevka, Fira Code, IBM Plex Mono, VT323, Press Start 2P – licencja SIL OFL-1.1).
  * Rysujemy je jako ścieżki SVG z kształtów znaków zapisanych w fonts/<nazwa>.json (patrz scripts/gen-fonts.mjs),
  * więc działają bez instalowania czegokolwiek i mają dokładną szerokość tekstu.
  * Znaki, których dana czcionka nie ma, nie są pożyczane z innej czcionki:
@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 type G = { a: number; d: string };
 type Face = { regular: Record<string, G>; bold?: Record<string, G> };
 
-export const BUNDLED_FONTS = ["JetBrains Mono", "Iosevka"];
+export const BUNDLED_FONTS = ["JetBrains Mono", "Iosevka", "Fira Code", "IBM Plex Mono", "VT323", "Press Start 2P"];
 
 const here = dirname(fileURLToPath(import.meta.url));
 const DIRS = [join(here, "..", "fonts"), join(process.cwd(), "com.elemental.infobar.sdPlugin", "fonts")];
@@ -47,8 +47,13 @@ export function covers(id: string, text: string, bold = true): boolean {
 	return load(id) !== null;
 }
 
+/** Korekta rozmiaru czcionek, które przy tym samym rozmiarze wyglądają na dużo większe lub mniejsze od pozostałych. */
+const SCALE: Record<string, number> = { "Press Start 2P": 0.6, VT323: 1.25 };
+const scaleOf = (id: string) => SCALE[id] ?? 1;
+
 /** Dokładna szerokość tekstu w pikselach. */
 export function measure(id: string, text: string, size: number, bold: boolean, spacing = 0): number {
+	size *= scaleOf(id);
 	let w = 0;
 	let n = 0;
 	for (const ch of text) {
@@ -61,7 +66,7 @@ export function measure(id: string, text: string, size: number, bold: boolean, s
 /** Tekst jako grupa ścieżek SVG; zwraca też szerokość. */
 export function glyphRun(id: string, text: string, size: number, bold: boolean, x: number, y: number, fill: string, anchor: "start" | "middle" | "end" = "start", spacing = 0): { svg: string; width: number } {
 	const width = measure(id, text, size, bold, spacing);
-	const k = size / 1000;
+	const k = (size * scaleOf(id)) / 1000;
 	const sx = anchor === "middle" ? x - width / 2 : anchor === "end" ? x - width : x;
 	let off = 0;
 	let body = "";
