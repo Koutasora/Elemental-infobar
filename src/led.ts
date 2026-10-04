@@ -9,7 +9,7 @@ import type { Sensors, Settings } from "./types";
  */
 export type LedCtx = { s: Settings; now: Date; accent: string; sensors: Sensors; ms: number };
 
-export const DEFAULT_LED = "#38bdf8"; // taka sama wartość jak default próbnika koloru w panelu
+export const DEFAULT_LED = "#ff4d8d"; // taki sam kolor panel wpisuje do ustawień przy wyborze trybu z kolorem (wyraźnie inny niż domyślny błękit diod)
 const HEX = /^#[0-9a-f]{6}$/i;
 
 const toRgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -32,7 +32,8 @@ const WEEK = ["#a855f7", "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", 
 /** Kolor linii sterującej diodami albo null (tryb automatyczny: nic nie rysujemy). */
 export function ledColor(c: LedCtx): string | null {
 	const { s } = c;
-	const picked = HEX.test(s.ledColor ?? "") ? (s.ledColor as string) : DEFAULT_LED;
+	// czarna linia daje kolor domyślny diod, więc czerń (próbnik zapisuje ją, gdy tylko go otworzysz) traktujemy jak brak wyboru
+	const picked = HEX.test(s.ledColor ?? "") && s.ledColor !== "#000000" ? (s.ledColor as string) : DEFAULT_LED;
 	switch (s.ledMode) {
 		case "accent":
 			return c.accent;

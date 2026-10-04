@@ -104,7 +104,7 @@
 		</sdpi-select>
 	</sdpi-item>
 	<sdpi-item label="__MSG_ledPick__" data-when="ledMode=color,pulse">
-		<sdpi-color setting="ledColor" default="#38bdf8"></sdpi-color>
+		<sdpi-color setting="ledColor" default="#ff4d8d"></sdpi-color>
 	</sdpi-item>
 	<sdpi-item label=" ">
 		<div style="font-size:11px;line-height:1.4;opacity:.85"><sdpi-i18n key="ledNote"></sdpi-i18n></div>
@@ -301,9 +301,17 @@
 				});
 			};
 			var client = SDPIComponents.streamDeckClient;
-			var refresh = function () { client.getSettings().then(function (e) { apply(e.payload.settings); }); };
+			// Próbnik koloru bywa pokazywany z domyślną wartością, której nie ma w ustawieniach (a po otwarciu zapisuje czerń):
+			// wpisujemy kolor do ustawień od razu, żeby to, co widać w próbniku, było tym, co dostaje plugin
+			var ensureDefaults = function (s) {
+				var patch = {};
+				if ((s.ledMode === "color" || s.ledMode === "pulse") && (!s.ledColor || s.ledColor === "#000000")) patch.ledColor = "#ff4d8d";
+				if (s.accentMode === "custom" && !s.accent) patch.accent = "#38bdf8";
+				if (Object.keys(patch).length) { try { client.setSettings(Object.assign({}, s, patch)); } catch (e) { console.error(e); } }
+			};
+			var refresh = function () { client.getSettings().then(function (e) { apply(e.payload.settings); ensureDefaults(e.payload.settings || {}); }); };
 			refresh();
-			client.didReceiveSettings.subscribe(function (e) { apply(e.payload.settings); });
+			client.didReceiveSettings.subscribe(function (e) { apply(e.payload.settings); ensureDefaults(e.payload.settings || {}); });
 			// zmiana dowolnego pola: pobierz ustawienia ponownie i przelicz widoczność (zaraz i po chwili, gdy zapis już dotarł)
 			["change", "input", "click"].forEach(function (ev) { document.addEventListener(ev, function () { setTimeout(refresh, 80); setTimeout(refresh, 400); }, true); });
 		} catch (err) { console.error(err); }
