@@ -11,12 +11,15 @@ let sensorTimer: NodeJS.Timeout | undefined;
 let sensorEveryS = 0;
 
 const DEFAULT_SENSOR_S = 2;
+const DEFAULT_ACCENT = "#38bdf8"; // taka sama wartość jak default próbnika koloru w panelu
 const needsSensors = (m?: Mode) => m === "stats" || m === "dashboard";
 
 function frame(e: Entry): string {
 	const s = e.settings;
 	const t = THEMES[s.theme ?? "black"] ?? THEMES.black;
-	const accent = s.accentMode === "custom" && /^#[0-9a-f]{6}$/i.test(s.accent ?? "") ? (s.accent as string) : t.accent;
+	// Własny kolor: domyślna wartość próbnika w panelu (#38bdf8) nie jest zapisywana, dopóki jej nie zmienisz – używamy jej od razu
+	const picked = /^#[0-9a-f]{6}$/i.test(s.accent ?? "") ? (s.accent as string) : DEFAULT_ACCENT;
+	const accent = s.accentMode === "custom" ? picked : t.accent;
 	return renderMode(s.mode ?? "clock", { now: new Date(), s, t, accent, sensors, ms: Date.now(), smooth: rateOf(s) > 1 });
 }
 
