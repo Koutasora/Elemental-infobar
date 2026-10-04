@@ -20,13 +20,13 @@ export type Ctx = { now: Date; s: Settings; t: Theme; accent: string; sensors: S
 /** Szerokości znaków czcionek systemowych (jednostki 1000/em, tekst zwykły i pogrubiony) – patrz scripts/gen-metrics.mjs. */
 const M = METRICS as Record<string, { regular: Record<string, number>; bold: Record<string, number> }>;
 
-/** Czcionki systemowe z listy w panelu: stos CSS (kolejne nazwy to zapasowe). */
+/** Czcionki systemowe z listy w panelu: stos CSS (jedna nazwa, bez listy zapasowych: aplikacja Stream Deck źle znosi listy w font-family). */
 export const FONTS: Record<string, string> = {
-	"Segoe UI": "'Segoe UI', Arial, sans-serif",
-	Arial: "Arial, 'Segoe UI', sans-serif",
-	Bahnschrift: "Bahnschrift, 'Segoe UI', sans-serif",
-	Tahoma: "Tahoma, 'Segoe UI', sans-serif",
-	"Trebuchet MS": "'Trebuchet MS', 'Segoe UI', sans-serif",
+	"Segoe UI": "Segoe UI",
+	Arial: "Arial",
+	Bahnschrift: "Bahnschrift",
+	Tahoma: "Tahoma",
+	"Trebuchet MS": "Trebuchet MS",
 };
 const MONO_CSS = "'Cascadia Mono', Consolas, 'Courier New', monospace"; // tekst, którego nie ma w dołączonej czcionce
 
@@ -140,7 +140,6 @@ function clockMode(c: Ctx): string {
 	const size = 38;
 	const segs: Seg[] = [{ text: p.time, size, fill: t.fg, weight: 700, gap: 0 }];
 	if (p.ampm) segs.push({ text: p.ampm, size: 13, fill: accent, weight: 700, gap: 4 });
-	if (s.showSeconds === true) segs.push({ text: p.sec, size: 21, fill: accent, weight: 700, gap: 6 });
 	const r = run(6, 38, segs);
 	let out = r.svg;
 	const after = r.end;
@@ -258,7 +257,6 @@ function analogMode(c: Ctx): string {
 	const sec = p.z.s + (c.smooth ? c.now.getMilliseconds() / 1000 : 0); // płynna wskazówka przy wyższym odświeżaniu
 	const hand = (deg: number, len: number, w: number, col: string) => `<line x1="${cx}" y1="${cy}" x2="${pol(deg, len).split(" ")[0]}" y2="${pol(deg, len).split(" ")[1]}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
 	out += hand(((h % 12) + mi / 60) * 30, 11, 3, t.fg) + hand((mi + sec / 60) * 6, 16, 2, t.fg);
-	if (s.showSeconds === true) out += hand(sec * 6, 18, 1, accent);
 	out += `<circle cx="${cx}" cy="${cy}" r="2" fill="${accent}"/>`;
 	const big = p.ampm ? `${p.time} ${p.ampm}` : p.time;
 	out += tx(62, 28, big, fit(big, 160, 28), t.fg, 700);

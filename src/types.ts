@@ -16,7 +16,6 @@ export type Settings = {
 	label1?: string;
 	label2?: string;
 	hour12?: "24" | "12";
-	showSeconds?: boolean;
 	weekdayStyle?: "long" | "short" | "none";
 	dateFormat?: string;
 	capitalize?: boolean;

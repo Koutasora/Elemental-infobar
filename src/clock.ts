@@ -47,7 +47,6 @@ const p2 = (n: number) => String(n).padStart(2, "0");
 
 export type ClockParts = {
 	time: string;
-	sec: string;
 	ampm: string;
 	weekday: string;
 	weekdayShort: string;
@@ -86,7 +85,6 @@ export function clockParts(now: Date, s: Settings, tz: string): ClockParts {
 
 	return {
 		time,
-		sec: p2(z.s),
 		ampm,
 		weekday: s.weekdayStyle === "none" ? "" : name(s.weekdayStyle === "short" ? "short" : "long"),
 		weekdayShort: name("short"),

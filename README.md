@@ -4,7 +4,7 @@ Turns the infobar of the **Stream Deck Neo** (the small screen between the two t
 
 ![Elemental Infobar examples](docs/showcase.png)
 
-*Example infobars with sample values: clock, clock with seconds in a built-in font, two time zones, clock with readings, dashboard, analog clock, progress, 12-hour clock in English, a light theme, and the message shown when HWiNFO Shared Memory is off. The colored bars on both sides stand for the side lights.*
+*Example infobars with sample values: clock, clock in a built-in font, two time zones, clock with readings, dashboard, analog clock, progress, 12-hour clock in English, a light theme, and the message shown when HWiNFO Shared Memory is off. The colored bars on both sides stand for the side lights.*
 
 ## Requirements
 
@@ -33,21 +33,21 @@ Messages shown in the readings modes instead of a value:
 
 | Mode | What it shows |
 | --- | --- |
-| Clock | Big time, weekday and date; optional seconds |
+| Clock | Big time, weekday and date |
 | Two time zones | Two clocks side by side with city labels |
 | Clock + readings | Clock plus CPU / GPU temperature and RAM usage with small bars |
 | Dashboard | Clock plus gauge rings for CPU, GPU and RAM |
-| Analog clock | Analog face with hour, minute and (optional) second hand, plus digital time and date |
+| Analog clock | Analog face with hour and minute hands, plus digital time and date |
 | Progress | How far through the day / week / month / year you are |
 
 ## Options
 
 - **Date language**: system language, English, Polish, German, French, Spanish, Italian, Czech, Portuguese, Dutch or Ukrainian (weekday and month names)
-- **Time zone** from a list or any IANA name (e.g. `Europe/Vienna`); 24 h or 12 h; seconds; long / short / hidden weekday; eight date formats; capitalization of names
+- **Time zone** from a list or any IANA name (e.g. `Europe/Vienna`); 24 h or 12 h; long / short / hidden weekday; eight date formats; capitalization of names
 - **Themes**: Black, Midnight, Aurora, Sunset, Forest, Mono, Paper, plus your own accent color
 - **Fonts**: Segoe UI, Arial, Bahnschrift, Tahoma and Trebuchet MS (these all render at a similar size), and two monospaced fonts built into the plugin that need no installation – JetBrains Mono and Iosevka. A built-in font is used only for text it has all the glyphs for; anything else is drawn in a system font.
 - **Side lights** (the two lights next to the infobar): automatic, custom color, rainbow, pulsing, by CPU / GPU temperature, by time of day, by weekday, or flashing red when something runs too hot. The settings panel offers a palette of 12 fully saturated colors, the only ones the lights accept (picking one switches on the custom color), and a live preview of both lights. The plugin sets the lights through the color of a thin 2 px line along the bottom edge of the picture (thinner or darker lines do not work; you only see it in the app preview, not on the device), so nothing else on the infobar changes color. The lights cannot be switched off, and white, gray, black and pale shades are ignored, which is why only saturated colors are offered.
-- **Refresh rate**: from 1 to 20 times per second (a smooth sweeping second hand on the analog clock); readings can be updated every 1, 2, 5 or 10 seconds
+- **Refresh rate**: from 1 to 20 times per second (smoother movement of the analog hands); readings can be updated every 1, 2, 5 or 10 seconds
 - Readings: choose which of CPU / GPU / RAM to show and °C / °F
 - Language of the settings panel: English or Polish (Auto follows Stream Deck, or choose it yourself)
 
