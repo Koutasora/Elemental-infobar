@@ -5,6 +5,7 @@ import type { Sensors, Settings } from "./types";
 /**
  * Boczne diody Neo (dwie kreski przy pasku) przyjmują kolor z obrazu na pasku. Sprawdzone doświadczalnie:
  * cienka linia (2 px) przy dolnej krawędzi zmienia ich kolor. Dlatego sterujemy diodami przez kolor takiej linii.
+ * Wyłączyć ich się nie da: czarna linia daje kolor domyślny (sprawdził użytkownik), więc nie ma trybu "off".
  */
 export type LedCtx = { s: Settings; now: Date; accent: string; sensors: Sensors; ms: number };
 
@@ -37,10 +38,6 @@ export function ledColor(c: LedCtx): string | null {
 			return c.accent;
 		case "color":
 			return picked;
-		case "off":
-			return "#000000";
-		case "off2":
-			return "#101010";
 		case "rainbow":
 			return toHex(hsl(((c.ms / 1000 / 24) % 1) * 360, 1, 0.5)); // pełny obrót barw co 24 s
 		case "pulse": {
@@ -67,7 +64,7 @@ export function ledColor(c: LedCtx): string | null {
 			return WEEK[zoned(c.now, resolveTz(s.tz, s.customTz)).dow];
 		case "alert": {
 			const hot = (c.sensors.cpu?.temp ?? 0) >= 85 || (c.sensors.gpu?.temp ?? 0) >= 83;
-			return hot ? (Math.floor(c.ms / 500) % 2 === 0 ? "#ff0000" : "#400000") : "#000000"; // zwykle zgaszone, przy przegrzaniu miga na czerwono
+			return hot ? (Math.floor(c.ms / 500) % 2 === 0 ? "#ff0000" : "#400000") : null; // zwykle kolor domyślny (diod nie da się zgasić), przy przegrzaniu miga na czerwono
 		}
 		default:
 			return null;

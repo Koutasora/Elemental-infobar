@@ -31,7 +31,7 @@ Turns the infobar of the **Stream Deck Neo** (the small screen between the two t
 - **Time zone** from a list or any IANA name (e.g. `Europe/Vienna`); 24 h or 12 h; seconds; long / short / hidden weekday; eight date formats; ISO week number; capitalization of names
 - **Themes**: Black, Midnight, Aurora, Sunset, Forest, Mono, Paper, plus your own accent color
 - **Fonts**: Segoe UI, Arial, Bahnschrift, Tahoma and Trebuchet MS (these all render at a similar size), two monospaced fonts built into the plugin that need no installation – JetBrains Mono and Iosevka. A built-in font is used only for text it has all the glyphs for; anything else is drawn in a system font.
-- **Side lights** (the two lights next to the infobar): automatic, match the accent color, custom color, off, rainbow, pulsing, by CPU / GPU temperature, by time of day, by weekday, or red only when something runs too hot. The plugin sets them through the color of a thin 2 px line along the bottom edge of the picture.
+- **Side lights** (the two lights next to the infobar): automatic, match the accent color, custom color, rainbow, pulsing, by CPU / GPU temperature, by time of day, by weekday, or flashing red when something runs too hot. The plugin sets them through the color of a thin 2 px line along the bottom edge of the picture. The lights cannot be switched off: black just gives the default color.
 - **Refresh rate**: from 1 to 20 times per second (a smooth sweeping second hand on the analog clock); readings can be updated every 1, 2, 5 or 10 seconds
 - Readings: choose which of CPU / GPU / RAM to show and °C / °F
 - Settings panel language: English or Polish
