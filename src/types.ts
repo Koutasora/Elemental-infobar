@@ -19,7 +19,6 @@ export type Settings = {
 	showSeconds?: boolean;
 	weekdayStyle?: "long" | "short" | "none";
 	dateFormat?: string;
-	showWeek?: boolean;
 	capitalize?: boolean;
 
 	// efekt koloru akcentu (a więc i bocznych diod)

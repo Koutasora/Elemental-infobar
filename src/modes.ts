@@ -149,10 +149,8 @@ function clockMode(c: Ctx): string {
 	if (p.weekday) {
 		out += tx(rx, 21, p.weekday, fit(p.weekday, rw, 19), accent, 700);
 		out += tx(rx, 39, p.date, fit(p.date, rw, 15), t.dim, 500);
-		if (s.showWeek) out += tx(rx, 46, p.week, 9, t.dim, 600, "start", 1);
 	} else {
 		out += tx(rx, 27, p.date, fit(p.date, rw, 20), accent, 700);
-		if (s.showWeek) out += tx(rx, 44, p.week, 13, t.dim, 600);
 	}
 	return wrap(c, out);
 }

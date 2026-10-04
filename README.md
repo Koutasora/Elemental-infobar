@@ -33,7 +33,7 @@ Messages shown in the readings modes instead of a value:
 
 | Mode | What it shows |
 | --- | --- |
-| Clock | Big time, weekday and date; optional seconds and week number |
+| Clock | Big time, weekday and date; optional seconds |
 | Two time zones | Two clocks side by side with city labels |
 | Clock + readings | Clock plus CPU / GPU temperature and RAM usage with small bars |
 | Dashboard | Clock plus gauge rings for CPU, GPU and RAM |
@@ -43,7 +43,7 @@ Messages shown in the readings modes instead of a value:
 ## Options
 
 - **Date language**: system language, English, Polish, German, French, Spanish, Italian, Czech, Portuguese, Dutch or Ukrainian (weekday and month names)
-- **Time zone** from a list or any IANA name (e.g. `Europe/Vienna`); 24 h or 12 h; seconds; long / short / hidden weekday; eight date formats; ISO week number; capitalization of names
+- **Time zone** from a list or any IANA name (e.g. `Europe/Vienna`); 24 h or 12 h; seconds; long / short / hidden weekday; eight date formats; capitalization of names
 - **Themes**: Black, Midnight, Aurora, Sunset, Forest, Mono, Paper, plus your own accent color
 - **Fonts**: Segoe UI, Arial, Bahnschrift, Tahoma and Trebuchet MS (these all render at a similar size), and two monospaced fonts built into the plugin that need no installation – JetBrains Mono and Iosevka. A built-in font is used only for text it has all the glyphs for; anything else is drawn in a system font.
 - **Side lights** (the two lights next to the infobar) follow the accent color of the picture, so the accent color setting colors them too. On top of that an **accent effect** can animate the accent (day name, seconds, bars, gauges) and the lights with it: rainbow, pulsing, by CPU / GPU temperature, by time of day, by weekday, or flashing red when something runs too hot. The effects show best in the clock, two-zone, analog and progress modes; in the readings modes the data colors (green / amber / red) compete with the accent. The lights cannot be switched off, and black does not set a color.

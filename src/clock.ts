@@ -43,13 +43,6 @@ export function zoned(now: Date, tz: string): Zoned {
 	return { y: +o.year, mo: +o.month, d: +o.day, h: +o.hour % 24, mi: +o.minute, s: +o.second, dow: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(o.weekday) };
 }
 
-export function isoWeek(y: number, mo: number, d: number): number {
-	const dt = new Date(Date.UTC(y, mo - 1, d));
-	dt.setUTCDate(dt.getUTCDate() + 4 - (dt.getUTCDay() || 7));
-	const start = Date.UTC(dt.getUTCFullYear(), 0, 1);
-	return Math.ceil(((+dt - start) / 86400000 + 1) / 7);
-}
-
 const p2 = (n: number) => String(n).padStart(2, "0");
 
 export type ClockParts = {
@@ -60,7 +53,6 @@ export type ClockParts = {
 	weekdayShort: string;
 	date: string;
 	dateCompact: string;
-	week: string;
 	tz: string;
 	z: Zoned;
 };
@@ -100,7 +92,6 @@ export function clockParts(now: Date, s: Settings, tz: string): ClockParts {
 		weekdayShort: name("short"),
 		date,
 		dateCompact: `${z.d}.${z.mo}`,
-		week: `W${isoWeek(z.y, z.mo, z.d)}`,
 		tz,
 		z,
 	};
