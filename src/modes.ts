@@ -115,17 +115,19 @@ function clockMode(c: Ctx): string {
 	const { s, t, accent } = c;
 	const p = clockParts(c.now, s, resolveTz(s.tz, s.customTz));
 	const size = 38;
-	let out = tx(6, 38, p.time, size, t.fg, 700);
+	// godzina, AM/PM i sekundy w jednym napisie: sekundy zaczynają się zawsze tuż za ostatnią cyfrą, niezależnie od czcionki
+	let main = esc(p.time);
 	let after = 6 + tw(p.time, size);
 	if (p.ampm) {
-		out += tx(after + 4, 38, p.ampm, 12, accent, 700);
-		after += 4 + 16;
+		main += `<tspan dx="4" font-size="13" font-weight="700" fill="${accent}">${p.ampm}</tspan>`;
+		after += 4 + tw(p.ampm, 13);
 	}
 	if (s.showSeconds === true) {
-		out += tx(after + 6, 38, p.sec, 16, accent, 600);
-		after += 6 + tw(p.sec, 16);
+		main += `<tspan dx="6" font-size="21" font-weight="700" fill="${accent}">${p.sec}</tspan>`;
+		after += 6 + tw(p.sec, 21);
 	}
-	const rx = Math.max(124, Math.round(after + 12));
+	let out = `<text x="6" y="38" font-family="${fontCss}" font-size="${size}" font-weight="700" fill="${t.fg}">${main}</text>`;
+	const rx = Math.max(124, Math.round(after + 14));
 	const rw = 230 - rx;
 	if (p.weekday) {
 		out += tx(rx, 21, p.weekday, fit(p.weekday, rw, 19), accent, 700);
