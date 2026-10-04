@@ -36,6 +36,9 @@ const WEEK = ["#a855f7", "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", 
 export function accentEffect(c: LedCtx): string | null {
 	const { s } = c;
 	switch (s.ledMode) {
+		case "color":
+			// własny kolor: czerń nie narzuca koloru (diody zostają domyślne), więc czarny = brak nadpisania
+			return HEX.test(s.ledColor ?? "") && s.ledColor !== "#000000" ? (s.ledColor as string) : null;
 		case "rainbow":
 			return toHex(hsl(((c.ms / 1000 / 24) % 1) * 360, 1, 0.55)); // pełny obrót barw co 24 s
 		case "pulse": {
