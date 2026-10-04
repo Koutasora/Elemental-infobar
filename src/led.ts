@@ -9,6 +9,7 @@ import type { Sensors, Settings } from "./types";
  */
 export type LedCtx = { s: Settings; now: Date; accent: string; sensors: Sensors; ms: number };
 
+export const DEFAULT_LED2 = "#34d399"; // prawa dioda w trybie dwóch kolorów
 export const DEFAULT_LED = "#ff4d8d"; // taki sam kolor panel wpisuje do ustawień przy wyborze trybu z kolorem (wyraźnie inny niż domyślny błękit diod)
 const HEX = /^#[0-9a-f]{6}$/i;
 
@@ -29,8 +30,8 @@ function hsl(h: number, s: number, l: number): number[] {
 const DAY: [number, string][] = [[0, "#0b1a4a"], [5, "#25207a"], [6.5, "#ff7a3d"], [9, "#ffd36b"], [12, "#7fd8ff"], [16, "#ffe08a"], [18.5, "#ff6a3d"], [20, "#7a3cff"], [22, "#1a2a7a"], [24, "#0b1a4a"]];
 const WEEK = ["#a855f7", "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6"]; // niedziela ... sobota
 
-/** Kolor linii sterującej diodami albo null (tryb automatyczny: nic nie rysujemy). */
-export function ledColor(c: LedCtx): string | null {
+/** Kolor linii sterującej diodami: jeden kolor albo para [lewa, prawa]; null = tryb automatyczny (nic nie rysujemy). */
+export function ledColor(c: LedCtx): string | [string, string] | null {
 	const { s } = c;
 	// czarna linia daje kolor domyślny diod, więc czerń (próbnik zapisuje ją, gdy tylko go otworzysz) traktujemy jak brak wyboru
 	const picked = HEX.test(s.ledColor ?? "") && s.ledColor !== "#000000" ? (s.ledColor as string) : DEFAULT_LED;
@@ -39,6 +40,10 @@ export function ledColor(c: LedCtx): string | null {
 			return c.accent;
 		case "color":
 			return picked;
+		case "split": {
+			const right = HEX.test(s.ledColor2 ?? "") && s.ledColor2 !== "#000000" ? (s.ledColor2 as string) : DEFAULT_LED2;
+			return [picked, right];
+		}
 		case "rainbow":
 			return toHex(hsl(((c.ms / 1000 / 24) % 1) * 360, 1, 0.5)); // pełny obrót barw co 24 s
 		case "pulse": {
@@ -73,4 +78,7 @@ export function ledColor(c: LedCtx): string | null {
 }
 
 /** Dwupikselowa linia przy dolnej krawędzi paska. */
-export const ledStrip = (color: string) => `<rect x="0" y="48" width="232" height="2" fill="${color}"/>`;
+export const ledStrip = (color: string | [string, string]) =>
+	typeof color === "string"
+		? `<rect x="0" y="48" width="232" height="2" fill="${color}"/>`
+		: `<rect x="0" y="48" width="116" height="2" fill="${color[0]}"/><rect x="116" y="48" width="116" height="2" fill="${color[1]}"/>`; // lewa i prawa połowa osobnym kolorem

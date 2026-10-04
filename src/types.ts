@@ -25,6 +25,7 @@ export type Settings = {
 	// boczne diody (kolor linii przy dolnej krawędzi)
 	ledMode?: string;
 	ledColor?: string;
+	ledColor2?: string;
 
 	// wygląd i szybkość
 	font?: string;
