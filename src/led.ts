@@ -4,7 +4,7 @@ import type { Sensors, Settings } from "./types";
 
 /**
  * Boczne diody Neo (dwie kreski przy pasku) przyjmują kolor z obrazu na pasku. Sprawdzone doświadczalnie: cienka linia
- * przy dolnej krawędzi zmienia ich kolor, a czarny daje kolor domyślny (diod nie da się wyłączyć). Dlatego sterujemy
+ * przy dolnej krawędzi zmienia ich kolor, a czarny, biały i szary są ignorowane i dają kolor domyślny (diod nie da się wyłączyć ani ustawić na biało). Dlatego sterujemy
  * wyłącznie diodami, kolorem takiej linii, i nie zmieniamy żadnego innego koloru na pasku (np. dnia tygodnia).
  */
 export type LedCtx = { s: Settings; now: Date; sensors: Sensors; ms: number };
