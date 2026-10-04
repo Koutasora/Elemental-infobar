@@ -32,26 +32,19 @@ const MONO_CSS = "'Cascadia Mono', Consolas, 'Courier New', monospace"; // tekst
 
 let fontCss = FONTS["Segoe UI"];
 let metricName: string | null = "Segoe UI"; // czcionka z tabeli szerokości (dokładny układ)
-let fontScale = 1; // zapas dla czcionek wpisanych ręcznie (nieznane proporcje)
 let bundledId: string | null = null; // czcionka dołączona do pluginu (rysowana jako ścieżki)
 
-/** Ustawia czcionkę na czas jednego renderowania (render jest synchroniczny). */
+/** Ustawia czcionkę na czas jednego renderowania (render jest synchroniczny). Nieznana nazwa (np. stare ustawienie) = Segoe UI. */
 function useFont(s: Settings): void {
-	const raw = s.font === "custom" ? (s.customFont ?? "") : (s.font ?? "Segoe UI");
-	const name = raw.replace(/[^\p{L}\p{N} .\-]/gu, "").trim().slice(0, 40);
+	const name = s.font ?? "Segoe UI";
 	const bundled = findBundled(name);
 	bundledId = bundled ?? null;
-	fontScale = 1;
 	if (bundled) {
-		fontCss = MONO_CSS;
+		fontCss = MONO_CSS; // tylko dla tekstu, którego dołączona czcionka nie ma
 		metricName = null;
 	} else if (FONTS[name] && M[name]) {
 		fontCss = FONTS[name];
 		metricName = name;
-	} else if (name) {
-		fontCss = `'${name}', 'Segoe UI', Arial, sans-serif`; // dowolna zainstalowana czcionka
-		metricName = null;
-		fontScale = 1.12; // zapas na nieznane proporcje
 	} else {
 		fontCss = FONTS["Segoe UI"];
 		metricName = "Segoe UI";
@@ -59,7 +52,7 @@ function useFont(s: Settings): void {
 }
 const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-/** Szerokość tekstu: dokładna dla czcionek dołączonych i z tabeli, szacunkowa dla wpisanych ręcznie. */
+/** Szerokość tekstu: dokładna dla czcionek dołączonych i z tabeli. */
 function tw(v: string, size: number, bold = true): number {
 	if (bundledId && covers(bundledId, v, bold)) return measure(bundledId, v, size, bold);
 	if (metricName) {
@@ -68,10 +61,7 @@ function tw(v: string, size: number, bold = true): number {
 		for (const ch of v) w += t[ch] ?? 560;
 		return (w * size) / 1000;
 	}
-	if (bundledId) return v.length * 0.6 * size; // zapasowa czcionka o stałej szerokości
-	let w = 0;
-	for (const ch of v) w += /[0-9]/.test(ch) ? 0.57 : /[:.,; ]/.test(ch) ? 0.3 : 0.58;
-	return w * size * fontScale;
+	return v.length * 0.6 * size; // tekst spoza dołączonej czcionki, rysowany czcionką o stałej szerokości
 }
 /** Największy rozmiar czcionki (do maxSize), przy którym tekst mieści się w maxW. */
 const fit = (v: string, maxW: number, maxSize: number) => Math.max(7, Math.min(maxSize, Math.floor(maxW / (tw(v, 1) || 1))));

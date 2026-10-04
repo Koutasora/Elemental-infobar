@@ -24,7 +24,6 @@ export type Settings = {
 
 	// wygląd i szybkość
 	font?: string;
-	customFont?: string;
 	fps?: string;
 	sensorInterval?: string;
 

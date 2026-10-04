@@ -32,7 +32,7 @@ Turns the infobar of the **Stream Deck Neo** (the small screen between the two t
 - **Date language**: system language, English, Polish, German, French, Spanish, Italian, Czech, Portuguese, Dutch or Ukrainian (weekday and month names)
 - **Time zone** from a list or any IANA name (e.g. `Europe/Vienna`); 24 h or 12 h; seconds; long / short / hidden weekday; eight date formats; ISO week number; capitalization of names
 - **Themes**: Black, Midnight, Aurora, Sunset, Forest, Mono, Paper, plus your own accent color
-- **Fonts**: Segoe UI, Arial, Bahnschrift, Tahoma and Trebuchet MS (these all render at a similar size), two monospaced fonts built into the plugin that need no installation – JetBrains Mono and Iosevka – or any other installed font by name. A built-in font is used only for text it has all the glyphs for; anything else is drawn in a system font.
+- **Fonts**: Segoe UI, Arial, Bahnschrift, Tahoma and Trebuchet MS (these all render at a similar size), two monospaced fonts built into the plugin that need no installation – JetBrains Mono and Iosevka. A built-in font is used only for text it has all the glyphs for; anything else is drawn in a system font.
 - **Refresh rate**: from 1 to 20 times per second (a smooth sweeping second hand on the analog clock); readings can be updated every 1, 2, 5 or 10 seconds
 - Readings: choose which of CPU / GPU / RAM to show and °C / °F
 - Settings panel language: English or Polish

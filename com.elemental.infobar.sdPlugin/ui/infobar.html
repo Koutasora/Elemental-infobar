@@ -8,7 +8,7 @@
 		SDPIComponents.i18n.locales = {
 			en: {
 				panelLang: "Panel language", mode: "Mode", modeClock: "Clock", modeDual: "Two time zones", modeStats: "Clock + readings", modeDash: "Dashboard (gauges)", modeAnalog: "Analog clock", modeProgress: "Progress (day / week / month / year)", modeCountdown: "Countdown", modeMessage: "Message (scrolling)",
-				theme: "Theme", font: "Font", fontCustom: "Other (type below)…", customFont: "Font name", fontHint: "Any installed font", refresh: "Refresh rate", rAuto: "Automatic", rSec: "per second", sensorEvery: "Readings update", sEvery: "every", accent: "Accent color", accentTheme: "From theme", accentCustom: "Custom", accentPick: "Pick a color",
+				theme: "Theme", font: "Font", refresh: "Refresh rate", rAuto: "Automatic", rSec: "per second", sensorEvery: "Readings update", sEvery: "every", accent: "Accent color", accentTheme: "From theme", accentCustom: "Custom", accentPick: "Pick a color",
 				dateLang: "Date language", langSystem: "System language", tz: "Time zone", tzLocal: "Local (system)", tzCustom: "Other (type below)…", customTz: "Time zone name", tz2: "Second time zone", customTz2: "Second zone name", label1: "Left label", label2: "Right label", labelHint: "Optional – city by default",
 				hour: "Hours", h24: "24-hour", h12: "12-hour (AM/PM)", seconds: "Seconds", showSeconds: "Show seconds", weekday: "Weekday", wLong: "Long (Sunday)", wShort: "Short (Sun)", wNone: "Hide", dateFmt: "Date format", dMid: "4 Oct 2026 (month name)", dLong: "4 October 2026 (full month)", dDm: "4 October (no year)", week: "Week number", showWeek: "Show week number (W40)", caps: "Names", capsOpt: "Capitalize weekday and month",
 				hwinfo: "HWiNFO", hwinfoNote: "CPU and GPU readings come from HWiNFO: enable Shared Memory Support in its Settings. The free version turns it off after ~12 h – just enable it again.", show: "Show", showCpu: "CPU temperature", showGpu: "GPU temperature", showRam: "RAM usage", unit: "Unit",
@@ -17,7 +17,7 @@
 			},
 			pl: {
 				panelLang: "Język panelu", mode: "Tryb", modeClock: "Zegar", modeDual: "Dwie strefy czasowe", modeStats: "Zegar + odczyty", modeDash: "Pulpit (wskaźniki)", modeAnalog: "Zegar analogowy", modeProgress: "Postęp (dzień / tydzień / miesiąc / rok)", modeCountdown: "Odliczanie", modeMessage: "Napis (przewijany)",
-				theme: "Motyw", font: "Czcionka", fontCustom: "Inna (wpisz poniżej)…", customFont: "Nazwa czcionki", fontHint: "Dowolna zainstalowana czcionka", refresh: "Częstotliwość odświeżania", rAuto: "Automatyczna", rSec: "na sekundę", sensorEvery: "Odświeżanie odczytów", sEvery: "co", accent: "Kolor akcentu", accentTheme: "Z motywu", accentCustom: "Własny", accentPick: "Wybierz kolor",
+				theme: "Motyw", font: "Czcionka", refresh: "Częstotliwość odświeżania", rAuto: "Automatyczna", rSec: "na sekundę", sensorEvery: "Odświeżanie odczytów", sEvery: "co", accent: "Kolor akcentu", accentTheme: "Z motywu", accentCustom: "Własny", accentPick: "Wybierz kolor",
 				dateLang: "Język daty", langSystem: "Język systemu", tz: "Strefa czasowa", tzLocal: "Lokalna (systemowa)", tzCustom: "Inna (wpisz poniżej)…", customTz: "Nazwa strefy", tz2: "Druga strefa czasowa", customTz2: "Nazwa drugiej strefy", label1: "Podpis po lewej", label2: "Podpis po prawej", labelHint: "Opcjonalnie – domyślnie miasto",
 				hour: "Godziny", h24: "24-godzinny", h12: "12-godzinny (AM/PM)", seconds: "Sekundy", showSeconds: "Pokaż sekundy", weekday: "Dzień tygodnia", wLong: "Pełny (niedziela)", wShort: "Skrót (niedz.)", wNone: "Ukryj", dateFmt: "Format daty", dMid: "4 paź 2026 (nazwa miesiąca)", dLong: "4 października 2026 (pełna nazwa)", dDm: "4 października (bez roku)", week: "Numer tygodnia", showWeek: "Pokaż numer tygodnia (W40)", caps: "Nazwy", capsOpt: "Wielka litera w dniu tygodnia i miesiącu",
 				hwinfo: "HWiNFO", hwinfoNote: "Odczyty CPU i GPU pochodzą z HWiNFO: włącz Obsługę pamięci współdzielonej w jego ustawieniach. Darmowa wersja wyłącza ją po ok. 12 h – wystarczy włączyć ją ponownie.", show: "Pokaż", showCpu: "Temperaturę CPU", showGpu: "Temperaturę GPU", showRam: "Zajętość RAM", unit: "Jednostka",
@@ -71,11 +71,7 @@
 			<option value="Trebuchet MS">Trebuchet MS</option>
 			<option value="JetBrains Mono">JetBrains Mono (built-in)</option>
 			<option value="Iosevka">Iosevka (built-in)</option>
-			<option value="custom">__MSG_fontCustom__</option>
 		</sdpi-select>
-	</sdpi-item>
-	<sdpi-item label="__MSG_customFont__" data-when="font=custom">
-		<sdpi-textfield setting="customFont" placeholder="__MSG_fontHint__" maxlength="40"></sdpi-textfield>
 	</sdpi-item>
 	<sdpi-item label="__MSG_refresh__">
 		<sdpi-select setting="fps" default="auto">
@@ -298,7 +294,7 @@
 					if (ok && when) {
 						var kv = when.split("=");
 						var cur = s[kv[0]];
-						if (cur === undefined) cur = kv[0] === "accentMode" ? "theme" : kv[0] === "tz" ? "local" : kv[0] === "tz2" ? "America/New_York" : kv[0] === "font" ? "Segoe UI" : undefined;
+						if (cur === undefined) cur = kv[0] === "accentMode" ? "theme" : kv[0] === "tz" ? "local" : kv[0] === "tz2" ? "America/New_York" : undefined;
 						ok = cur === kv[1];
 					}
 					el.style.display = ok ? "" : "none";
