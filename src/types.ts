@@ -22,10 +22,8 @@ export type Settings = {
 	showWeek?: boolean;
 	capitalize?: boolean;
 
-	// boczne diody (kolor linii przy dolnej krawędzi)
+	// efekt koloru akcentu (a więc i bocznych diod)
 	ledMode?: string;
-	ledColor?: string;
-	ledColor2?: string;
 
 	// wygląd i szybkość
 	font?: string;

@@ -3,14 +3,13 @@ import { resolveTz, zoned } from "./clock";
 import type { Sensors, Settings } from "./types";
 
 /**
- * Boczne diody Neo (dwie kreski przy pasku) przyjmują kolor z obrazu na pasku. Sprawdzone doświadczalnie:
- * cienka linia (2 px) przy dolnej krawędzi zmienia ich kolor. Dlatego sterujemy diodami przez kolor takiej linii.
- * Wyłączyć ich się nie da: czarna linia daje kolor domyślny (sprawdził użytkownik), więc nie ma trybu "off".
+ * Boczne diody Neo (dwie kreski przy pasku) przyjmują kolor z obrazu na pasku, w praktyce z jego najwyraźniejszego,
+ * nasyconego koloru, czyli u nas z koloru akcentu (napis dnia, sekundy, paski, wskaźniki). Dlatego diodami sterujemy
+ * wyłącznie przez kolor akcentu, bez żadnej dodatkowej linii: efekty poniżej zmieniają kolor akcentu w czasie.
+ * Wyłączyć diod się nie da, a czerń nie narzuca koloru (sprawdził użytkownik).
  */
 export type LedCtx = { s: Settings; now: Date; accent: string; sensors: Sensors; ms: number };
 
-export const DEFAULT_LED2 = "#34d399"; // prawa dioda w trybie dwóch kolorów
-export const DEFAULT_LED = "#ff4d8d"; // taki sam kolor panel wpisuje do ustawień przy wyborze trybu z kolorem (wyraźnie inny niż domyślny błękit diod)
 const HEX = /^#[0-9a-f]{6}$/i;
 
 const toRgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -30,29 +29,22 @@ function hsl(h: number, s: number, l: number): number[] {
 const DAY: [number, string][] = [[0, "#0b1a4a"], [5, "#25207a"], [6.5, "#ff7a3d"], [9, "#ffd36b"], [12, "#7fd8ff"], [16, "#ffe08a"], [18.5, "#ff6a3d"], [20, "#7a3cff"], [22, "#1a2a7a"], [24, "#0b1a4a"]];
 const WEEK = ["#a855f7", "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6"]; // niedziela ... sobota
 
-/** Kolor linii sterującej diodami: jeden kolor albo para [lewa, prawa]; null = tryb automatyczny (nic nie rysujemy). */
-export function ledColor(c: LedCtx): string | [string, string] | null {
+/**
+ * Efekt koloru akcentu (a więc i bocznych diod) w danej chwili albo null (stały kolor akcentu, tryb domyślny).
+ * Zwrócony kolor zastępuje akcent motywu / własny akcent we wszystkich elementach akcentowych.
+ */
+export function accentEffect(c: LedCtx): string | null {
 	const { s } = c;
-	// czarna linia daje kolor domyślny diod, więc czerń (próbnik zapisuje ją, gdy tylko go otworzysz) traktujemy jak brak wyboru
-	const picked = HEX.test(s.ledColor ?? "") && s.ledColor !== "#000000" ? (s.ledColor as string) : DEFAULT_LED;
 	switch (s.ledMode) {
-		case "accent":
-			return c.accent;
-		case "color":
-			return picked;
-		case "split": {
-			const right = HEX.test(s.ledColor2 ?? "") && s.ledColor2 !== "#000000" ? (s.ledColor2 as string) : DEFAULT_LED2;
-			return [picked, right];
-		}
 		case "rainbow":
-			return toHex(hsl(((c.ms / 1000 / 24) % 1) * 360, 1, 0.5)); // pełny obrót barw co 24 s
+			return toHex(hsl(((c.ms / 1000 / 24) % 1) * 360, 1, 0.55)); // pełny obrót barw co 24 s
 		case "pulse": {
-			const k = 0.25 + 0.75 * (0.5 + 0.5 * Math.sin((c.ms / 1000) * ((2 * Math.PI) / 3.5))); // oddech co 3,5 s
-			return toHex(toRgb(picked).map((v) => v * k));
+			const k = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin((c.ms / 1000) * ((2 * Math.PI) / 3.5))); // oddech co 3,5 s
+			return toHex(toRgb(HEX.test(c.accent) ? c.accent : "#38bdf8").map((v) => v * k));
 		}
 		case "temp": {
 			const t = [c.sensors.cpu?.temp, c.sensors.gpu?.temp].filter((v): v is number => typeof v === "number");
-			return t.length ? autoColor(Math.max(...t), 70, 85) : c.accent;
+			return t.length ? autoColor(Math.max(...t), 70, 85) : null;
 		}
 		case "hours": {
 			const z = zoned(c.now, resolveTz(s.tz, s.customTz));
@@ -70,15 +62,9 @@ export function ledColor(c: LedCtx): string | [string, string] | null {
 			return WEEK[zoned(c.now, resolveTz(s.tz, s.customTz)).dow];
 		case "alert": {
 			const hot = (c.sensors.cpu?.temp ?? 0) >= 85 || (c.sensors.gpu?.temp ?? 0) >= 83;
-			return hot ? (Math.floor(c.ms / 500) % 2 === 0 ? "#ff0000" : "#400000") : null; // zwykle kolor domyślny (diod nie da się zgasić), przy przegrzaniu miga na czerwono
+			return hot ? (Math.floor(c.ms / 500) % 2 === 0 ? "#ff2d2d" : "#7a1010") : null; // przy przegrzaniu akcent miga na czerwono
 		}
 		default:
 			return null;
 	}
 }
-
-/** Dwupikselowa linia przy dolnej krawędzi paska. */
-export const ledStrip = (color: string | [string, string]) =>
-	typeof color === "string"
-		? `<rect x="0" y="48" width="232" height="2" fill="${color}"/>`
-		: `<rect x="0" y="48" width="116" height="2" fill="${color[0]}"/><rect x="116" y="48" width="116" height="2" fill="${color[1]}"/>`; // lewa i prawa połowa osobnym kolorem

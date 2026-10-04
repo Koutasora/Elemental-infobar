@@ -1,7 +1,7 @@
 import streamDeck, { action, SingletonAction, WillAppearEvent, WillDisappearEvent, DidReceiveSettingsEvent, type NeoInfobarAction } from "@elgato/streamdeck";
 import { THEMES, renderMode } from "./modes";
 import { readCpu, readGpu, readRam, shmStatus } from "./sensors";
-import { ledColor, ledStrip } from "./led";
+import { accentEffect } from "./led";
 import type { Sensors, Settings } from "./types";
 
 type Entry = { bar: NeoInfobarAction<Settings>; settings: Settings; timer?: NodeJS.Timeout; last: string };
@@ -21,12 +21,12 @@ function frame(e: Entry): string {
 	const t = THEMES[s.theme ?? "black"] ?? THEMES.black;
 	// Własny kolor: domyślna wartość próbnika w panelu (#38bdf8) nie jest zapisywana, dopóki jej nie zmienisz – używamy jej od razu
 	const picked = /^#[0-9a-f]{6}$/i.test(s.accent ?? "") ? (s.accent as string) : DEFAULT_ACCENT;
-	const accent = s.accentMode === "custom" ? picked : t.accent;
+	const base = s.accentMode === "custom" ? picked : t.accent;
 	const now = new Date();
 	const ms = Date.now();
-	const svg = renderMode(s.mode ?? "clock", { now, s, t, accent, sensors, ms, smooth: rateOf(s) > 1 });
-	const led = ledColor({ s, now, accent, sensors, ms });
-	return led ? svg.replace("</svg>", `${ledStrip(led)}</svg>`) : svg;
+	// Boczne diody idą za kolorem akcentu, więc efekty (tęcza, pulsowanie, temperatura...) zmieniają sam akcent – bez dodatkowej linii
+	const accent = accentEffect({ s, now, accent: base, sensors, ms }) ?? base;
+	return renderMode(s.mode ?? "clock", { now, s, t, accent, sensors, ms, smooth: rateOf(s) > 1 });
 }
 
 /** Liczba odświeżeń na sekundę: wybrana w panelu albo domyślnie 1. */
