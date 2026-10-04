@@ -8,15 +8,23 @@ type Entry = { bar: NeoInfobarAction<Settings>; settings: Settings; timer?: Node
 const bars = new Map<string, Entry>();
 let sensors: Sensors = { cpu: null, gpu: null, ram: null, status: "unknown" };
 let sensorTimer: NodeJS.Timeout | undefined;
+let sensorEveryS = 0;
 
-const SENSOR_POLL_MS = 2000;
+const DEFAULT_SENSOR_S = 2;
 const needsSensors = (m?: Mode) => m === "stats" || m === "dashboard";
 
 function frame(e: Entry): string {
 	const s = e.settings;
 	const t = THEMES[s.theme ?? "black"] ?? THEMES.black;
 	const accent = s.accentMode === "custom" && /^#[0-9a-f]{6}$/i.test(s.accent ?? "") ? (s.accent as string) : t.accent;
-	return renderMode(s.mode ?? "clock", { now: new Date(), s, t, accent, sensors, ms: Date.now() });
+	return renderMode(s.mode ?? "clock", { now: new Date(), s, t, accent, sensors, ms: Date.now(), smooth: rateOf(s) > 1 });
+}
+
+/** Liczba odświeżeń na sekundę: wybrana w panelu albo domyślna dla trybu (napis 15/s, reszta 1/s). */
+function rateOf(s: Settings): number {
+	const n = Number(s.fps);
+	if (s.fps && s.fps !== "auto" && Number.isFinite(n) && n >= 1) return Math.min(30, n);
+	return (s.mode ?? "clock") === "message" ? 15 : 1;
 }
 
 async function draw(id: string): Promise<void> {
@@ -28,13 +36,13 @@ async function draw(id: string): Promise<void> {
 	await e.bar.setFeedback({ img: `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}` });
 }
 
-/** Zegar odświeżamy co sekundę, napis przewijany ok. 15 razy na sekundę. */
+/** Odświeżamy z częstotliwością z panelu; gdy obraz się nie zmienił, nic nie wysyłamy. */
 function schedule(id: string): void {
 	const e = bars.get(id);
 	if (!e) return;
 	if (e.timer) clearInterval(e.timer);
 	e.last = "";
-	e.timer = setInterval(() => void draw(id), (e.settings.mode ?? "clock") === "message" ? 66 : 1000);
+	e.timer = setInterval(() => void draw(id), Math.round(1000 / rateOf(e.settings)));
 	void draw(id);
 }
 
@@ -44,13 +52,16 @@ async function refreshSensors(): Promise<void> {
 }
 
 function ensureSensorTimer(): void {
-	const need = [...bars.values()].some((e) => needsSensors(e.settings.mode));
-	if (need && !sensorTimer) {
-		sensorTimer = setInterval(() => void refreshSensors(), SENSOR_POLL_MS);
+	const users = [...bars.values()].filter((e) => needsSensors(e.settings.mode));
+	// najkrótszy interwał ze wszystkich pasków, które potrzebują odczytów
+	const every = users.length ? Math.min(...users.map((e) => Math.max(1, Number(e.settings.sensorInterval) || DEFAULT_SENSOR_S))) : 0;
+	if (every === sensorEveryS && (every === 0) === !sensorTimer) return;
+	if (sensorTimer) clearInterval(sensorTimer);
+	sensorTimer = undefined;
+	sensorEveryS = every;
+	if (every > 0) {
+		sensorTimer = setInterval(() => void refreshSensors(), every * 1000);
 		void refreshSensors();
-	} else if (!need && sensorTimer) {
-		clearInterval(sensorTimer);
-		sensorTimer = undefined;
 	}
 }
 
@@ -58,6 +69,7 @@ function ensureSensorTimer(): void {
 class Infobar extends SingletonAction<Settings> {
 	override async onWillAppear(ev: WillAppearEvent<Settings>): Promise<void> {
 		if (!ev.action.isNeoInfobar()) return;
+		streamDeck.logger.info(`appear settings=${JSON.stringify(ev.payload.settings)}`);
 		await ev.action.setFeedbackLayout("layouts/bar.json");
 		// drugi zegar ma sensowną wartość domyślną, żeby panel nie pokazywał "lokalny" dwa razy
 		if (ev.payload.settings.tz2 === undefined) await ev.action.setSettings({ ...ev.payload.settings, tz2: "America/New_York" });
@@ -74,6 +86,7 @@ class Infobar extends SingletonAction<Settings> {
 	}
 
 	override onDidReceiveSettings(ev: DidReceiveSettingsEvent<Settings>): void {
+		streamDeck.logger.info(`settings changed=${JSON.stringify(ev.payload.settings)} known=${bars.has(ev.action.id)}`);
 		const e = bars.get(ev.action.id);
 		if (!e) return;
 		e.settings = ev.payload.settings;

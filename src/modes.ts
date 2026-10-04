@@ -13,22 +13,62 @@ export const THEMES: Record<string, Theme> = {
 	paper: { name: "Paper", bg: ["#f4f3ee", "#dedbd1"], fg: "#16130f", dim: "#5b574d", accent: "#c2410c", track: "#c4c0b3" },
 };
 
-export type Ctx = { now: Date; s: Settings; t: Theme; accent: string; sensors: Sensors; ms: number };
+export type Ctx = { now: Date; s: Settings; t: Theme; accent: string; sensors: Sensors; ms: number; smooth?: boolean };
 
-const FONT = `font-family="Segoe UI, Arial, sans-serif"`;
+/** Znane czcionki: stos CSS i współczynnik szerokości (względem Segoe UI) do dopasowywania tekstu. */
+export const FONTS: Record<string, { css: string; scale: number; mono?: boolean }> = {
+	"Segoe UI": { css: "'Segoe UI', Arial, sans-serif", scale: 1 },
+	Arial: { css: "Arial, 'Segoe UI', sans-serif", scale: 0.98 },
+	Bahnschrift: { css: "Bahnschrift, 'Segoe UI', sans-serif", scale: 0.92 },
+	Calibri: { css: "Calibri, 'Segoe UI', sans-serif", scale: 0.9 },
+	Cambria: { css: "Cambria, Georgia, serif", scale: 1.02 },
+	Consolas: { css: "Consolas, 'Courier New', monospace", scale: 1.0, mono: true },
+	"Courier New": { css: "'Courier New', monospace", scale: 1.06, mono: true },
+	Georgia: { css: "Georgia, serif", scale: 1.15 },
+	Impact: { css: "Impact, 'Arial Narrow', sans-serif", scale: 0.86 },
+	"Lucida Console": { css: "'Lucida Console', monospace", scale: 1.08, mono: true },
+	Tahoma: { css: "Tahoma, 'Segoe UI', sans-serif", scale: 1.1 },
+	"Trebuchet MS": { css: "'Trebuchet MS', 'Segoe UI', sans-serif", scale: 1.04 },
+	Verdana: { css: "Verdana, 'Segoe UI', sans-serif", scale: 1.27 },
+	"Comic Sans MS": { css: "'Comic Sans MS', 'Segoe UI', sans-serif", scale: 1.12 },
+};
+
+let fontCss = FONTS["Segoe UI"].css;
+let fontScale = 1;
+let fontMono = false;
+
+/** Ustawia czcionkę na czas jednego renderowania (render jest synchroniczny). */
+function useFont(s: Settings): void {
+	const raw = s.font === "custom" ? (s.customFont ?? "") : (s.font ?? "Segoe UI");
+	const name = raw.replace(/[^\p{L}\p{N} .\-]/gu, "").trim().slice(0, 40);
+	const known = FONTS[name];
+	if (known) {
+		fontCss = known.css;
+		fontScale = known.scale;
+		fontMono = known.mono === true;
+	} else if (name) {
+		fontCss = `'${name}', 'Segoe UI', Arial, sans-serif`; // dowolna zainstalowana czcionka
+		fontScale = 1.12; // zapas na nieznane proporcje
+		fontMono = false;
+	} else {
+		fontCss = FONTS["Segoe UI"].css;
+		fontScale = 1;
+		fontMono = false;
+	}
+}
 const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 /** Przybliżona szerokość tekstu: cyfry ~0.57 em, dwukropek/kropka ~0.3 em, reszta ~0.58 em. */
 function tw(v: string, size: number): number {
 	let w = 0;
-	for (const ch of v) w += /[0-9]/.test(ch) ? 0.57 : /[:.,; ]/.test(ch) ? 0.3 : 0.58;
-	return w * size;
+	for (const ch of v) w += /[0-9]/.test(ch) ? 0.57 : /[:.,; ]/.test(ch) ? (fontMono ? 0.58 : 0.3) : 0.58;
+	return w * size * fontScale;
 }
 /** Największy rozmiar czcionki (do maxSize), przy którym tekst mieści się w maxW. */
 const fit = (v: string, maxW: number, maxSize: number) => Math.max(7, Math.min(maxSize, Math.floor(maxW / (tw(v, 1) || 1))));
 
 function tx(x: number, y: number, v: string, size: number, fill: string, weight = 400, anchor: "start" | "middle" | "end" = "start", spacing = 0): string {
-	return `<text x="${x}" y="${y}" text-anchor="${anchor}" ${FONT} font-size="${size}" font-weight="${weight}" fill="${fill}"${spacing ? ` letter-spacing="${spacing}"` : ""}>${esc(v)}</text>`;
+	return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="${fontCss}" font-size="${size}" font-weight="${weight}" fill="${fill}"${spacing ? ` letter-spacing="${spacing}"` : ""}>${esc(v)}</text>`;
 }
 
 function wrap(c: Ctx, inner: string): string {
@@ -78,12 +118,12 @@ function clockMode(c: Ctx): string {
 	let out = tx(6, 38, p.time, size, t.fg, 700);
 	let after = 6 + tw(p.time, size);
 	if (p.ampm) {
-		out += tx(after + 2, 38, p.ampm, 12, accent, 700);
-		after += 2 + 15;
+		out += tx(after + 4, 38, p.ampm, 12, accent, 700);
+		after += 4 + 16;
 	}
 	if (s.showSeconds === true) {
-		out += tx(after + 3, 38, p.sec, 16, accent, 600);
-		after += 3 + tw(p.sec, 16);
+		out += tx(after + 6, 38, p.sec, 16, accent, 600);
+		after += 6 + tw(p.sec, 16);
 	}
 	const rx = Math.max(124, Math.round(after + 12));
 	const rw = 230 - rx;
@@ -194,7 +234,8 @@ function analogMode(c: Ctx): string {
 	const pol = (deg: number, len: number) => `${(cx + len * Math.sin((deg * Math.PI) / 180)).toFixed(2)} ${(cy - len * Math.cos((deg * Math.PI) / 180)).toFixed(2)}`;
 	let out = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${t.track}" stroke-width="2"/>`;
 	for (let i = 0; i < 12; i++) out += `<line x1="${pol(i * 30, i % 3 === 0 ? 16 : 18.5).split(" ")[0]}" y1="${pol(i * 30, i % 3 === 0 ? 16 : 18.5).split(" ")[1]}" x2="${pol(i * 30, 20.5).split(" ")[0]}" y2="${pol(i * 30, 20.5).split(" ")[1]}" stroke="${i % 3 === 0 ? accent : t.dim}" stroke-width="${i % 3 === 0 ? 2 : 1}"/>`;
-	const { h, mi, s: sec } = p.z;
+	const { h, mi } = p.z;
+	const sec = p.z.s + (c.smooth ? c.now.getMilliseconds() / 1000 : 0); // płynna wskazówka przy wyższym odświeżaniu
 	const hand = (deg: number, len: number, w: number, col: string) => `<line x1="${cx}" y1="${cy}" x2="${pol(deg, len).split(" ")[0]}" y2="${pol(deg, len).split(" ")[1]}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
 	out += hand(((h % 12) + mi / 60) * 30, 11, 3, t.fg) + hand((mi + sec / 60) * 6, 16, 2, t.fg);
 	if (s.showSeconds === true) out += hand(sec * 6, 18, 1, accent);
@@ -272,6 +313,7 @@ function messageMode(c: Ctx): string {
 }
 
 export function renderMode(mode: Mode, c: Ctx): string {
+	useFont(c.s);
 	switch (mode) {
 		case "dual": return dualMode(c);
 		case "stats": return statsMode(c);

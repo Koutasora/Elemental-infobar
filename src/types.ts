@@ -22,6 +22,12 @@ export type Settings = {
 	showWeek?: boolean;
 	capitalize?: boolean;
 
+	// wygląd i szybkość
+	font?: string;
+	customFont?: string;
+	fps?: string;
+	sensorInterval?: string;
+
 	// odczyty
 	showCpu?: boolean;
 	showGpu?: boolean;
