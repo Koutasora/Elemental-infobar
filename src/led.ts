@@ -69,15 +69,5 @@ export function ledColor(c: LedCtx): string | null {
 	}
 }
 
-/** Parametry linii "grubość-jasność%" (TYMCZASOWE ustawienie do sprawdzenia, jak cienka i ciemna może być linia). */
-export function lineParams(v?: string): { px: number; k: number } {
-	const m = /^(\d)-(\d{1,3})$/.exec(v ?? "");
-	return m ? { px: Math.min(4, Math.max(1, +m[1])), k: Math.min(100, +m[2]) / 100 } : { px: 2, k: 1 };
-}
-
-/** Linia przy dolnej krawędzi paska o grubości px i jasności k (1 = pełny kolor). */
-export function ledStrip(color: string, px = 2, k = 1): string {
-	const rgb = HEX.test(color) ? toRgb(color) : [0, 0, 0];
-	const fill = k >= 1 ? color : toHex(rgb.map((v) => v * k));
-	return `<rect x="0" y="${50 - px}" width="232" height="${px}" fill="${fill}"/>`;
-}
+/** Dwupikselowa linia przy dolnej krawędzi paska (na urządzeniu jest niewidoczna, widać ją tylko w podglądzie w aplikacji). */
+export const ledStrip = (color: string) => `<rect x="0" y="48" width="232" height="2" fill="${color}"/>`;

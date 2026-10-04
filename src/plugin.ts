@@ -1,7 +1,7 @@
 import streamDeck, { action, SingletonAction, WillAppearEvent, WillDisappearEvent, DidReceiveSettingsEvent, type NeoInfobarAction } from "@elgato/streamdeck";
 import { THEMES, renderMode } from "./modes";
 import { readCpu, readGpu, readRam, shmStatus } from "./sensors";
-import { ledColor, ledStrip, lineParams } from "./led";
+import { ledColor, ledStrip } from "./led";
 import type { Sensors, Settings } from "./types";
 
 type Entry = { bar: NeoInfobarAction<Settings>; settings: Settings; timer?: NodeJS.Timeout; last: string };
@@ -27,8 +27,7 @@ function frame(e: Entry): string {
 	const svg = renderMode(s.mode ?? "clock", { now, s, t, accent: base, sensors, ms, smooth: rateOf(s) > 1 });
 	// Diodami sterujemy tylko kolorem cienkiej linii przy dolnej krawędzi; żaden inny kolor na pasku się nie zmienia
 	const led = ledColor({ s, now, sensors, ms });
-	const { px, k } = lineParams(s.ledLine);
-	return led ? svg.replace("</svg>", `${ledStrip(led, px, k)}</svg>`) : svg;
+	return led ? svg.replace("</svg>", `${ledStrip(led)}</svg>`) : svg;
 }
 
 /** Liczba odświeżeń na sekundę: wybrana w panelu albo domyślnie 1. */
