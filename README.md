@@ -1,0 +1,62 @@
+# Elemental Infobar – Stream Deck Neo infobar plugin
+
+Turns the infobar of the **Stream Deck Neo** (the small screen between the two touch points) into a clock, world clock, dashboard, countdown and more. Colors, themes and the language of weekday / month names are up to you.
+
+## Requirements
+
+- Stream Deck Neo and Stream Deck software **7.6** or newer (earlier versions cannot draw on the infobar)
+- Windows 10/11
+- For CPU / GPU readings only: [HWiNFO](https://www.hwinfo.com/) running with **Shared Memory Support** enabled (Settings). RAM usage and all clock modes work without it.
+
+## Install and set up
+
+1. Install `com.elemental.infobar.streamDeckPlugin` (double-click it).
+2. In the Stream Deck app drag **Infobar** (category **Elemental Infobar**) onto the infobar of the Neo preview – the wide rectangle between the touch points. This replaces the built-in *Digital Time* action on that page.
+3. Pick a mode and tweak it in the settings.
+
+## Modes
+
+| Mode | What it shows |
+| --- | --- |
+| Clock | Big time, weekday and date; optional seconds and week number |
+| Two time zones | Two clocks side by side with city labels |
+| Clock + readings | Clock plus CPU / GPU temperature and RAM usage with small bars |
+| Dashboard | Clock plus gauge rings for CPU, GPU and RAM |
+| Analog clock | Analog face with hour, minute and (optional) second hand, plus digital time and date |
+| Progress | How far through the day / week / month / year you are |
+| Countdown | Days and time left to an event you choose |
+| Message | Your own text, scrolling when it is too long |
+
+## Settings
+
+- **Date language**: system language, English, Polish, German, French, Spanish, Italian, Czech, Portuguese, Dutch or Ukrainian (weekday and month names)
+- **Time zone** from a list or any IANA name (e.g. `Europe/Vienna`); 24 h or 12 h; seconds; long / short / hidden weekday; eight date formats; ISO week number; capitalization of names
+- **Themes**: Black, Midnight, Aurora, Sunset, Forest, Mono, Paper, plus your own accent color
+- Readings: choose which of CPU / GPU / RAM to show and °C / °F
+- Settings panel language: English or Polish
+
+## Good to know
+
+- The infobar is not a button: it only displays. The two touch points next to it are not programmable.
+- The plugin draws the whole infobar as one 232 × 50 px image, so colors and fonts are the same everywhere.
+- For the readings modes the plugin starts a small `powershell.exe` helper to read HWiNFO's shared memory. Locked-down PCs or aggressive antivirus software may block it. Nothing is sent over the network.
+- The free version of HWiNFO switches Shared Memory off after about 12 hours; the readings then show **Enable HWiNFO Shared Memory** – enable it again and they come back by themselves.
+
+## Development
+
+```
+npm install
+npm run deploy      # build + restart the plugin
+npm run typecheck
+npx streamdeck pack com.elemental.infobar.sdPlugin --output dist --force
+```
+
+- `src/clock.ts` – time zones, locale-aware names, date formats
+- `src/modes.ts` – SVG rendering of every mode and theme
+- `src/plugin.ts` – the infobar action, timers, sensor polling
+- `src/sensors.ts` + `com.elemental.infobar.sdPlugin/bin/hwinfo-shm.ps1` – HWiNFO shared memory reader
+- `com.elemental.infobar.sdPlugin/ui/infobar.html` – settings panel
+
+## License
+
+MIT – see [LICENSE](LICENSE). Third-party components bundled with the plugin and their licenses are listed in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).

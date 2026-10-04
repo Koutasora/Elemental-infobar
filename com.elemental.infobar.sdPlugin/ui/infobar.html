@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<meta charset="utf-8" />
+	<script src="sdpi-components.js"></script>
+	<script>
+		// --- translations (en / pl). Messages are referenced as __MSG_key__ in the markup below ---
+		SDPIComponents.i18n.locales = {
+			en: {
+				panelLang: "Panel language", mode: "Mode", modeClock: "Clock", modeDual: "Two time zones", modeStats: "Clock + readings", modeDash: "Dashboard (gauges)", modeAnalog: "Analog clock", modeProgress: "Progress (day / week / month / year)", modeCountdown: "Countdown", modeMessage: "Message (scrolling)",
+				theme: "Theme", accent: "Accent color", accentTheme: "From theme", accentCustom: "Custom", accentPick: "Pick a color",
+				dateLang: "Date language", langSystem: "System language", tz: "Time zone", tzLocal: "Local (system)", tzCustom: "Other (type below)…", customTz: "Time zone name", tz2: "Second time zone", customTz2: "Second zone name", label1: "Left label", label2: "Right label", labelHint: "Optional – city by default",
+				hour: "Hours", h24: "24-hour", h12: "12-hour (AM/PM)", seconds: "Seconds", showSeconds: "Show seconds", weekday: "Weekday", wLong: "Long (Sunday)", wShort: "Short (Sun)", wNone: "Hide", dateFmt: "Date format", dMid: "4 Oct 2026 (month name)", dLong: "4 October 2026 (full month)", dDm: "4 October (no year)", week: "Week number", showWeek: "Show week number (W40)", caps: "Names", capsOpt: "Capitalize weekday and month",
+				hwinfo: "HWiNFO", hwinfoNote: "CPU and GPU readings come from HWiNFO: enable Shared Memory Support in its Settings. The free version turns it off after ~12 h – just enable it again.", show: "Show", showCpu: "CPU temperature", showGpu: "GPU temperature", showRam: "RAM usage", unit: "Unit",
+				progress: "Show", pDay: "Day", pWeek: "Week", pMonth: "Month", pYear: "Year",
+				cdLabel: "Event name", cdDate: "Date and time", msg: "Message", msgPh: "Type something…", scroll: "Scroll speed", sNormal: "Normal", sSlow: "Slow", sFast: "Fast",
+			},
+			pl: {
+				panelLang: "Język panelu", mode: "Tryb", modeClock: "Zegar", modeDual: "Dwie strefy czasowe", modeStats: "Zegar + odczyty", modeDash: "Pulpit (wskaźniki)", modeAnalog: "Zegar analogowy", modeProgress: "Postęp (dzień / tydzień / miesiąc / rok)", modeCountdown: "Odliczanie", modeMessage: "Napis (przewijany)",
+				theme: "Motyw", accent: "Kolor akcentu", accentTheme: "Z motywu", accentCustom: "Własny", accentPick: "Wybierz kolor",
+				dateLang: "Język daty", langSystem: "Język systemu", tz: "Strefa czasowa", tzLocal: "Lokalna (systemowa)", tzCustom: "Inna (wpisz poniżej)…", customTz: "Nazwa strefy", tz2: "Druga strefa czasowa", customTz2: "Nazwa drugiej strefy", label1: "Podpis po lewej", label2: "Podpis po prawej", labelHint: "Opcjonalnie – domyślnie miasto",
+				hour: "Godziny", h24: "24-godzinny", h12: "12-godzinny (AM/PM)", seconds: "Sekundy", showSeconds: "Pokaż sekundy", weekday: "Dzień tygodnia", wLong: "Pełny (niedziela)", wShort: "Skrót (niedz.)", wNone: "Ukryj", dateFmt: "Format daty", dMid: "4 paź 2026 (nazwa miesiąca)", dLong: "4 października 2026 (pełna nazwa)", dDm: "4 października (bez roku)", week: "Numer tygodnia", showWeek: "Pokaż numer tygodnia (W40)", caps: "Nazwy", capsOpt: "Wielka litera w dniu tygodnia i miesiącu",
+				hwinfo: "HWiNFO", hwinfoNote: "Odczyty CPU i GPU pochodzą z HWiNFO: włącz Obsługę pamięci współdzielonej w jego ustawieniach. Darmowa wersja wyłącza ją po ok. 12 h – wystarczy włączyć ją ponownie.", show: "Pokaż", showCpu: "Temperaturę CPU", showGpu: "Temperaturę GPU", showRam: "Zajętość RAM", unit: "Jednostka",
+				progress: "Pokaż", pDay: "Dzień", pWeek: "Tydzień", pMonth: "Miesiąc", pYear: "Rok",
+				cdLabel: "Nazwa wydarzenia", cdDate: "Data i godzina", msg: "Napis", msgPh: "Wpisz coś…", scroll: "Szybkość przewijania", sNormal: "Normalna", sSlow: "Wolna", sFast: "Szybka",
+			},
+		};
+		var langChoice = "auto";
+		try { langChoice = localStorage.getItem("elementalLang") || "auto"; } catch (e) {}
+		SDPIComponents.i18n.language = langChoice === "auto" ? (SDPIComponents.i18n.locales[SDPIComponents.i18n.language] ? SDPIComponents.i18n.language : "en") : langChoice;
+	</script>
+</head>
+<body>
+	<sdpi-item label="__MSG_panelLang__">
+		<select id="langSel" style="width:100%;background:#2d2d2d;color:#d8d8d8;border:1px solid #555;border-radius:4px;padding:4px">
+			<option value="auto">Auto</option>
+			<option value="en">English</option>
+			<option value="pl">Polski</option>
+		</select>
+	</sdpi-item>
+
+	<sdpi-item label="__MSG_mode__">
+		<sdpi-select setting="mode" default="clock">
+			<option value="clock">__MSG_modeClock__</option>
+			<option value="dual">__MSG_modeDual__</option>
+			<option value="stats">__MSG_modeStats__</option>
+			<option value="dashboard">__MSG_modeDash__</option>
+			<option value="analog">__MSG_modeAnalog__</option>
+			<option value="progress">__MSG_modeProgress__</option>
+			<option value="countdown">__MSG_modeCountdown__</option>
+			<option value="message">__MSG_modeMessage__</option>
+		</sdpi-select>
+	</sdpi-item>
+	<sdpi-item label="__MSG_theme__">
+		<sdpi-select setting="theme" default="black">
+			<option value="black">Black</option>
+			<option value="midnight">Midnight</option>
+			<option value="aurora">Aurora</option>
+			<option value="sunset">Sunset</option>
+			<option value="forest">Forest</option>
+			<option value="mono">Mono</option>
+			<option value="paper">Paper</option>
+		</sdpi-select>
+	</sdpi-item>
+	<sdpi-item label="__MSG_accent__">
+		<sdpi-select setting="accentMode" default="theme">
+			<option value="theme">__MSG_accentTheme__</option>
+			<option value="custom">__MSG_accentCustom__</option>
+		</sdpi-select>
+	</sdpi-item>
+	<sdpi-item label="__MSG_accentPick__" data-when="accentMode=custom">
+		<sdpi-color setting="accent" default="#38bdf8"></sdpi-color>
+	</sdpi-item>
+
+	<sdpi-item label="__MSG_dateLang__">
+		<sdpi-select setting="clockLang" default="system">
+			<option value="system">__MSG_langSystem__</option>
+			<option value="en">English</option>
+			<option value="pl">Polski</option>
+			<option value="de">Deutsch</option>
+			<option value="fr">Français</option>
+			<option value="es">Español</option>
+			<option value="it">Italiano</option>
+			<option value="cs">Čeština</option>
+			<option value="pt">Português</option>
+			<option value="nl">Nederlands</option>
+			<option value="uk">Українська</option>
+		</sdpi-select>
+	</sdpi-item>
+
+	<sdpi-item label="__MSG_tz__" data-modes="clock dual stats dashboard analog progress">
+		<sdpi-select setting="tz" default="local">
+			<option value="local">__MSG_tzLocal__</option>
+			<option value="UTC">UTC</option>
+			<option value="Europe/Warsaw">Warsaw</option>
+			<option value="Europe/London">London</option>
+			<option value="Europe/Berlin">Berlin</option>
+			<option value="Europe/Paris">Paris</option>
+			<option value="Europe/Madrid">Madrid</option>
+			<option value="Europe/Rome">Rome</option>
+			<option value="Europe/Kyiv">Kyiv</option>
+			<option value="America/New_York">New York</option>
+			<option value="America/Chicago">Chicago</option>
+			<option value="America/Denver">Denver</option>
+			<option value="America/Los_Angeles">Los Angeles</option>
+			<option value="America/Sao_Paulo">São Paulo</option>
+			<option value="Asia/Dubai">Dubai</option>
+			<option value="Asia/Kolkata">Kolkata</option>
+			<option value="Asia/Shanghai">Shanghai</option>
+			<option value="Asia/Tokyo">Tokyo</option>
+			<option value="Asia/Seoul">Seoul</option>
+			<option value="Australia/Sydney">Sydney</option>
+			<option value="Pacific/Auckland">Auckland</option>
+			<option value="custom">__MSG_tzCustom__</option>
+		</sdpi-select>
+	</sdpi-item>
+	<sdpi-item label="__MSG_customTz__" data-modes="clock dual stats dashboard analog progress" data-when="tz=custom">
+		<sdpi-textfield setting="customTz" placeholder="Europe/Vienna"></sdpi-textfield>
+	</sdpi-item>
+
+	<sdpi-item label="__MSG_tz2__" data-modes="dual">
+		<sdpi-select setting="tz2" default="America/New_York">
+			<option value="America/New_York">New York</option>
+			<option value="local">__MSG_tzLocal__</option>
+			<option value="UTC">UTC</option>
+			<option value="Europe/Warsaw">Warsaw</option>
+			<option value="Europe/London">London</option>
+			<option value="Europe/Berlin">Berlin</option>
+			<option value="Europe/Paris">Paris</option>
+			<option value="Europe/Madrid">Madrid</option>
+			<option value="Europe/Rome">Rome</option>
+			<option value="Europe/Kyiv">Kyiv</option>
+			<option value="America/Chicago">Chicago</option>
+			<option value="America/Denver">Denver</option>
+			<option value="America/Los_Angeles">Los Angeles</option>
+			<option value="America/Sao_Paulo">São Paulo</option>
+			<option value="Asia/Dubai">Dubai</option>
+			<option value="Asia/Kolkata">Kolkata</option>
+			<option value="Asia/Shanghai">Shanghai</option>
+			<option value="Asia/Tokyo">Tokyo</option>
+			<option value="Asia/Seoul">Seoul</option>
+			<option value="Australia/Sydney">Sydney</option>
+			<option value="Pacific/Auckland">Auckland</option>
+			<option value="custom">__MSG_tzCustom__</option>
+		</sdpi-select>
+	</sdpi-item>
+	<sdpi-item label="__MSG_customTz2__" data-modes="dual" data-when="tz2=custom">
+		<sdpi-textfield setting="customTz2" placeholder="Asia/Singapore"></sdpi-textfield>
+	</sdpi-item>
+	<sdpi-item label="__MSG_label1__" data-modes="dual">
+		<sdpi-textfield setting="label1" placeholder="__MSG_labelHint__" maxlength="14"></sdpi-textfield>
+	</sdpi-item>
+	<sdpi-item label="__MSG_label2__" data-modes="dual">
+		<sdpi-textfield setting="label2" placeholder="__MSG_labelHint__" maxlength="14"></sdpi-textfield>
+	</sdpi-item>
+
+	<sdpi-item label="__MSG_hour__" data-modes="clock dual stats dashboard analog">
+		<sdpi-select setting="hour12" default="24">
+			<option value="24">__MSG_h24__</option>
+			<option value="12">__MSG_h12__</option>
+		</sdpi-select>
+	</sdpi-item>
+	<sdpi-item label="__MSG_seconds__" data-modes="clock analog">
+		<sdpi-checkbox setting="showSeconds" label="__MSG_showSeconds__"></sdpi-checkbox>
+	</sdpi-item>
+	<sdpi-item label="__MSG_weekday__" data-modes="clock analog">
+		<sdpi-select setting="weekdayStyle" default="long">
+			<option value="long">__MSG_wLong__</option>
+			<option value="short">__MSG_wShort__</option>
+			<option value="none">__MSG_wNone__</option>
+		</sdpi-select>
+	</sdpi-item>
+	<sdpi-item label="__MSG_dateFmt__" data-modes="clock analog">
+		<sdpi-select setting="dateFormat" default="d.M.yyyy">
+			<option value="d.M.yyyy">4.10.2026</option>
+			<option value="dd.MM.yyyy">04.10.2026</option>
+			<option value="yyyy-MM-dd">2026-10-04</option>
+			<option value="MM/dd/yyyy">10/04/2026</option>
+			<option value="dd/MM/yyyy">04/10/2026</option>
+			<option value="mid">__MSG_dMid__</option>
+			<option value="long">__MSG_dLong__</option>
+			<option value="dm">__MSG_dDm__</option>
+		</sdpi-select>
+	</sdpi-item>
+	<sdpi-item label="__MSG_week__" data-modes="clock">
+		<sdpi-checkbox setting="showWeek" label="__MSG_showWeek__"></sdpi-checkbox>
+	</sdpi-item>
+	<sdpi-item label="__MSG_caps__" data-modes="clock dual stats dashboard analog">
+		<sdpi-checkbox setting="capitalize" default="true" label="__MSG_capsOpt__"></sdpi-checkbox>
+	</sdpi-item>
+
+	<sdpi-item label="__MSG_hwinfo__" data-modes="stats dashboard">
+		<div style="font-size:11px;line-height:1.4;opacity:.85"><sdpi-i18n key="hwinfoNote"></sdpi-i18n></div>
+	</sdpi-item>
+	<sdpi-item label="__MSG_show__" data-modes="stats dashboard">
+		<sdpi-checkbox setting="showCpu" default="true" label="__MSG_showCpu__"></sdpi-checkbox>
+	</sdpi-item>
+	<sdpi-item label=" " data-modes="stats dashboard">
+		<sdpi-checkbox setting="showGpu" default="true" label="__MSG_showGpu__"></sdpi-checkbox>
+	</sdpi-item>
+	<sdpi-item label=" " data-modes="stats dashboard">
+		<sdpi-checkbox setting="showRam" default="true" label="__MSG_showRam__"></sdpi-checkbox>
+	</sdpi-item>
+	<sdpi-item label="__MSG_unit__" data-modes="stats dashboard">
+		<sdpi-select setting="unit" default="C">
+			<option value="C">°C</option>
+			<option value="F">°F</option>
+		</sdpi-select>
+	</sdpi-item>
+
+	<sdpi-item label="__MSG_progress__" data-modes="progress">
+		<sdpi-checkbox setting="progDay" default="true" label="__MSG_pDay__"></sdpi-checkbox>
+	</sdpi-item>
+	<sdpi-item label=" " data-modes="progress">
+		<sdpi-checkbox setting="progWeek" default="true" label="__MSG_pWeek__"></sdpi-checkbox>
+	</sdpi-item>
+	<sdpi-item label=" " data-modes="progress">
+		<sdpi-checkbox setting="progMonth" default="true" label="__MSG_pMonth__"></sdpi-checkbox>
+	</sdpi-item>
+	<sdpi-item label=" " data-modes="progress">
+		<sdpi-checkbox setting="progYear" default="true" label="__MSG_pYear__"></sdpi-checkbox>
+	</sdpi-item>
+
+	<sdpi-item label="__MSG_cdLabel__" data-modes="countdown">
+		<sdpi-textfield setting="targetLabel" maxlength="30"></sdpi-textfield>
+	</sdpi-item>
+	<sdpi-item label="__MSG_cdDate__" data-modes="countdown">
+		<sdpi-calendar setting="targetDate" type="datetime-local"></sdpi-calendar>
+	</sdpi-item>
+
+	<sdpi-item label="__MSG_msg__" data-modes="message">
+		<sdpi-textfield setting="message" maxlength="200" placeholder="__MSG_msgPh__"></sdpi-textfield>
+	</sdpi-item>
+	<sdpi-item label="__MSG_scroll__" data-modes="message">
+		<sdpi-select setting="scroll" default="normal">
+			<option value="normal">__MSG_sNormal__</option>
+			<option value="slow">__MSG_sSlow__</option>
+			<option value="fast">__MSG_sFast__</option>
+		</sdpi-select>
+	</sdpi-item>
+
+	<script>
+		// language picker: remember the choice and reload so every label is rebuilt in the new language
+		try {
+			var sel = document.getElementById("langSel");
+			sel.value = langChoice;
+			sel.addEventListener("change", function () {
+				try { localStorage.setItem("elementalLang", sel.value); } catch (e) {}
+				location.reload();
+			});
+		} catch (err) { console.error(err); }
+
+		// show only the fields that make sense for the chosen mode (if this fails, all fields stay visible)
+		try {
+			var items = Array.prototype.slice.call(document.querySelectorAll("sdpi-item[data-modes], sdpi-item[data-when]"));
+			var apply = function (s) {
+				s = s || {};
+				var mode = s.mode || "clock";
+				items.forEach(function (el) {
+					var ok = true;
+					var modes = el.getAttribute("data-modes");
+					if (modes && modes.split(" ").indexOf(mode) < 0) ok = false;
+					var when = el.getAttribute("data-when");
+					if (ok && when) {
+						var kv = when.split("=");
+						var cur = s[kv[0]];
+						if (cur === undefined) cur = kv[0] === "accentMode" ? "theme" : kv[0] === "tz" ? "local" : kv[0] === "tz2" ? "America/New_York" : undefined;
+						ok = cur === kv[1];
+					}
+					el.style.display = ok ? "" : "none";
+				});
+			};
+			var client = SDPIComponents.streamDeckClient;
+			client.getSettings().then(function (e) { apply(e.payload.settings); });
+			client.didReceiveSettings.subscribe(function (e) { apply(e.payload.settings); });
+		} catch (err) { console.error(err); }
+	</script>
+</body>
+</html>

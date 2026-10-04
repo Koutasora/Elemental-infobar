@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "SDKVersion": 3,
+  "UUID": "com.elemental.infobar",
+  "Name": "Elemental Infobar",
+  "Version": "0.1.0.0",
+  "Author": "Rafał",
+  "Description": "Clock, world clocks, system readings, countdown, progress and more for the Stream Deck Neo infobar, with themes and your own language.",
+  "Icon": "imgs/plugin-icon",
+  "Category": "Elemental Infobar",
+  "CategoryIcon": "imgs/category-icon",
+  "CodePath": "bin/plugin.js",
+  "Nodejs": { "Version": "20" },
+  "OS": [{ "Platform": "windows", "MinimumVersion": "10" }],
+  "Software": { "MinimumVersion": "7.6" },
+  "Actions": [
+    {
+      "UUID": "com.elemental.infobar.bar",
+      "Name": "Infobar",
+      "Tooltip": "Clock, readings, countdown and more on the Stream Deck Neo infobar.",
+      "Icon": "imgs/action-icon",
+      "PropertyInspectorPath": "ui/infobar.html",
+      "Controllers": ["Neo"],
+      "States": [{ "Image": "imgs/key-default", "ShowTitle": false }]
+    }
+  ]
+}

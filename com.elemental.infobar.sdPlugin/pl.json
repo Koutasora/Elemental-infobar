@@ -1,0 +1,8 @@
+{
+	"Name": "Elemental Infobar",
+	"Description": "Zegar, zegary światowe, odczyty systemu, odliczanie, postęp i więcej na pasku informacyjnym Stream Deck Neo, z motywami i wyborem języka.",
+	"com.elemental.infobar.bar": {
+		"Name": "Pasek informacyjny",
+		"Tooltip": "Zegar, odczyty, odliczanie i więcej na pasku informacyjnym Stream Deck Neo."
+	}
+}

@@ -1,0 +1,4 @@
+node_modules/
+dist/
+com.elemental.infobar.sdPlugin/logs/
+com.elemental.infobar.sdPlugin/bin/plugin.js
