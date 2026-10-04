@@ -6,7 +6,7 @@ import type { Sensors, Settings } from "./types";
  * Boczne diody Neo (dwie kreski przy pasku) przyjmują kolor z obrazu na pasku, w praktyce z jego najwyraźniejszego,
  * nasyconego koloru, czyli u nas z koloru akcentu (napis dnia, sekundy, paski, wskaźniki). Dlatego diodami sterujemy
  * wyłącznie przez kolor akcentu, bez żadnej dodatkowej linii: efekty poniżej zmieniają kolor akcentu w czasie.
- * Wyłączyć diod się nie da, a czerń nie narzuca koloru (sprawdził użytkownik).
+ * Wyłączyć diod się nie da: bez nasyconego koloru na pasku (np. czarny akcent) wracają do koloru domyślnego (sprawdził użytkownik).
  */
 export type LedCtx = { s: Settings; now: Date; accent: string; sensors: Sensors; ms: number };
 
@@ -37,8 +37,8 @@ export function accentEffect(c: LedCtx): string | null {
 	const { s } = c;
 	switch (s.ledMode) {
 		case "color":
-			// własny kolor: czerń nie narzuca koloru (diody zostają domyślne), więc czarny = brak nadpisania
-			return HEX.test(s.ledColor ?? "") && s.ledColor !== "#000000" ? (s.ledColor as string) : null;
+			// własny kolor; czarny znaczy czarny: akcent robi się czarny ("udaje wyłączone"), a same diody wracają do koloru domyślnego
+			return HEX.test(s.ledColor ?? "") ? (s.ledColor as string) : null;
 		case "rainbow":
 			return toHex(hsl(((c.ms / 1000 / 24) % 1) * 360, 1, 0.55)); // pełny obrót barw co 24 s
 		case "pulse": {
