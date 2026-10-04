@@ -23,7 +23,8 @@ export type Settings = {
 
 	// efekt koloru akcentu (a więc i bocznych diod)
 	ledMode?: string;
-	ledColor?: string; // własny kolor diod (a więc akcentu), gdy ledMode = "color"
+	ledColor?: string; // własny kolor diod, gdy ledMode = "color"
+	ledLine?: string; // TYMCZASOWE: grubość-jasność linii sterującej diodami, np. "2-100"
 
 	// wygląd i szybkość
 	font?: string;

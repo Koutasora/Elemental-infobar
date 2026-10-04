@@ -1,7 +1,7 @@
 import streamDeck, { action, SingletonAction, WillAppearEvent, WillDisappearEvent, DidReceiveSettingsEvent, type NeoInfobarAction } from "@elgato/streamdeck";
 import { THEMES, renderMode } from "./modes";
 import { readCpu, readGpu, readRam, shmStatus } from "./sensors";
-import { accentEffect } from "./led";
+import { ledColor, ledStrip, lineParams } from "./led";
 import type { Sensors, Settings } from "./types";
 
 type Entry = { bar: NeoInfobarAction<Settings>; settings: Settings; timer?: NodeJS.Timeout; last: string };
@@ -24,9 +24,11 @@ function frame(e: Entry): string {
 	const base = s.accentMode === "custom" ? picked : t.accent;
 	const now = new Date();
 	const ms = Date.now();
-	// Boczne diody idą za kolorem akcentu, więc efekty (tęcza, pulsowanie, temperatura...) zmieniają sam akcent – bez dodatkowej linii
-	const accent = accentEffect({ s, now, accent: base, sensors, ms }) ?? base;
-	return renderMode(s.mode ?? "clock", { now, s, t, accent, sensors, ms, smooth: rateOf(s) > 1 });
+	const svg = renderMode(s.mode ?? "clock", { now, s, t, accent: base, sensors, ms, smooth: rateOf(s) > 1 });
+	// Diodami sterujemy tylko kolorem cienkiej linii przy dolnej krawędzi; żaden inny kolor na pasku się nie zmienia
+	const led = ledColor({ s, now, sensors, ms });
+	const { px, k } = lineParams(s.ledLine);
+	return led ? svg.replace("</svg>", `${ledStrip(led, px, k)}</svg>`) : svg;
 }
 
 /** Liczba odświeżeń na sekundę: wybrana w panelu albo domyślnie 1. */

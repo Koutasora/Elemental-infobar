@@ -3,13 +3,13 @@ import { resolveTz, zoned } from "./clock";
 import type { Sensors, Settings } from "./types";
 
 /**
- * Boczne diody Neo (dwie kreski przy pasku) przyjmują kolor z obrazu na pasku, w praktyce z jego najwyraźniejszego,
- * nasyconego koloru, czyli u nas z koloru akcentu (napis dnia, sekundy, paski, wskaźniki). Dlatego diodami sterujemy
- * wyłącznie przez kolor akcentu, bez żadnej dodatkowej linii: efekty poniżej zmieniają kolor akcentu w czasie.
- * Wyłączyć diod się nie da: bez nasyconego koloru na pasku (np. czarny akcent) wracają do koloru domyślnego (sprawdził użytkownik).
+ * Boczne diody Neo (dwie kreski przy pasku) przyjmują kolor z obrazu na pasku. Sprawdzone doświadczalnie: cienka linia
+ * przy dolnej krawędzi zmienia ich kolor, a czarny daje kolor domyślny (diod nie da się wyłączyć). Dlatego sterujemy
+ * wyłącznie diodami, kolorem takiej linii, i nie zmieniamy żadnego innego koloru na pasku (np. dnia tygodnia).
  */
-export type LedCtx = { s: Settings; now: Date; accent: string; sensors: Sensors; ms: number };
+export type LedCtx = { s: Settings; now: Date; sensors: Sensors; ms: number };
 
+export const DEFAULT_LED = "#ff4d8d"; // kolor wpisywany do ustawień przy wyborze trybu "Własny kolor"
 const HEX = /^#[0-9a-f]{6}$/i;
 
 const toRgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -29,21 +29,18 @@ function hsl(h: number, s: number, l: number): number[] {
 const DAY: [number, string][] = [[0, "#0b1a4a"], [5, "#25207a"], [6.5, "#ff7a3d"], [9, "#ffd36b"], [12, "#7fd8ff"], [16, "#ffe08a"], [18.5, "#ff6a3d"], [20, "#7a3cff"], [22, "#1a2a7a"], [24, "#0b1a4a"]];
 const WEEK = ["#a855f7", "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6"]; // niedziela ... sobota
 
-/**
- * Efekt koloru akcentu (a więc i bocznych diod) w danej chwili albo null (stały kolor akcentu, tryb domyślny).
- * Zwrócony kolor zastępuje akcent motywu / własny akcent we wszystkich elementach akcentowych.
- */
-export function accentEffect(c: LedCtx): string | null {
+/** Kolor linii sterującej diodami albo null (tryb automatyczny: nic nie rysujemy, diody robią co chcą). */
+export function ledColor(c: LedCtx): string | null {
 	const { s } = c;
+	const picked = HEX.test(s.ledColor ?? "") ? (s.ledColor as string) : DEFAULT_LED;
 	switch (s.ledMode) {
 		case "color":
-			// własny kolor; czarny znaczy czarny: akcent robi się czarny ("udaje wyłączone"), a same diody wracają do koloru domyślnego
-			return HEX.test(s.ledColor ?? "") ? (s.ledColor as string) : null;
+			return HEX.test(s.ledColor ?? "") ? (s.ledColor as string) : null; // czarny znaczy czarny (diody wracają do domyślnego)
 		case "rainbow":
-			return toHex(hsl(((c.ms / 1000 / 24) % 1) * 360, 1, 0.55)); // pełny obrót barw co 24 s
+			return toHex(hsl(((c.ms / 1000 / 24) % 1) * 360, 1, 0.5)); // pełny obrót barw co 24 s
 		case "pulse": {
 			const k = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin((c.ms / 1000) * ((2 * Math.PI) / 3.5))); // oddech co 3,5 s
-			return toHex(toRgb(HEX.test(c.accent) ? c.accent : "#38bdf8").map((v) => v * k));
+			return toHex(toRgb(picked).map((v) => v * k));
 		}
 		case "temp": {
 			const t = [c.sensors.cpu?.temp, c.sensors.gpu?.temp].filter((v): v is number => typeof v === "number");
@@ -65,9 +62,22 @@ export function accentEffect(c: LedCtx): string | null {
 			return WEEK[zoned(c.now, resolveTz(s.tz, s.customTz)).dow];
 		case "alert": {
 			const hot = (c.sensors.cpu?.temp ?? 0) >= 85 || (c.sensors.gpu?.temp ?? 0) >= 83;
-			return hot ? (Math.floor(c.ms / 500) % 2 === 0 ? "#ff2d2d" : "#7a1010") : null; // przy przegrzaniu akcent miga na czerwono
+			return hot ? (Math.floor(c.ms / 500) % 2 === 0 ? "#ff0000" : "#400000") : null; // zwykle domyślne, przy przegrzaniu miga na czerwono
 		}
 		default:
 			return null;
 	}
+}
+
+/** Parametry linii "grubość-jasność%" (TYMCZASOWE ustawienie do sprawdzenia, jak cienka i ciemna może być linia). */
+export function lineParams(v?: string): { px: number; k: number } {
+	const m = /^(\d)-(\d{1,3})$/.exec(v ?? "");
+	return m ? { px: Math.min(4, Math.max(1, +m[1])), k: Math.min(100, +m[2]) / 100 } : { px: 2, k: 1 };
+}
+
+/** Linia przy dolnej krawędzi paska o grubości px i jasności k (1 = pełny kolor). */
+export function ledStrip(color: string, px = 2, k = 1): string {
+	const rgb = HEX.test(color) ? toRgb(color) : [0, 0, 0];
+	const fill = k >= 1 ? color : toHex(rgb.map((v) => v * k));
+	return `<rect x="0" y="${50 - px}" width="232" height="${px}" fill="${fill}"/>`;
 }
