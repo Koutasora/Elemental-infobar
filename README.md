@@ -1,6 +1,6 @@
 # Elemental Infobar – Stream Deck Neo infobar plugin
 
-Turns the infobar of the **Stream Deck Neo** (the small screen between the two touch points) into a clock, world clock, dashboard, countdown and more. Colors, themes and the language of weekday / month names are up to you.
+Turns the infobar of the **Stream Deck Neo** (the small screen between the two touch points) into a clock, world clock, dashboard and more. Colors, themes and the language of weekday / month names are up to you.
 
 ## Requirements
 
@@ -24,8 +24,6 @@ Turns the infobar of the **Stream Deck Neo** (the small screen between the two t
 | Dashboard | Clock plus gauge rings for CPU, GPU and RAM |
 | Analog clock | Analog face with hour, minute and (optional) second hand, plus digital time and date |
 | Progress | How far through the day / week / month / year you are |
-| Countdown | Days and time left to an event you choose |
-| Message | Your own text, scrolling when it is too long |
 
 ## Settings
 

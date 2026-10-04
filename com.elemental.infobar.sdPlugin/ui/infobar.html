@@ -7,22 +7,20 @@
 		// --- translations (en / pl). Messages are referenced as __MSG_key__ in the markup below ---
 		SDPIComponents.i18n.locales = {
 			en: {
-				panelLang: "Panel language", mode: "Mode", modeClock: "Clock", modeDual: "Two time zones", modeStats: "Clock + readings", modeDash: "Dashboard (gauges)", modeAnalog: "Analog clock", modeProgress: "Progress (day / week / month / year)", modeCountdown: "Countdown", modeMessage: "Message (scrolling)",
+				panelLang: "Panel language", mode: "Mode", modeClock: "Clock", modeDual: "Two time zones", modeStats: "Clock + readings", modeDash: "Dashboard (gauges)", modeAnalog: "Analog clock", modeProgress: "Progress (day / week / month / year)",
 				theme: "Theme", font: "Font", refresh: "Refresh rate", rAuto: "Automatic", rSec: "per second", sensorEvery: "Readings update", sEvery: "every", accent: "Accent color", accentTheme: "From theme", accentCustom: "Custom", accentPick: "Pick a color",
 				dateLang: "Date language", langSystem: "System language", tz: "Time zone", tzLocal: "Local (system)", tzCustom: "Other (type below)…", customTz: "Time zone name", tz2: "Second time zone", customTz2: "Second zone name", label1: "Left label", label2: "Right label", labelHint: "Optional – city by default",
 				hour: "Hours", h24: "24-hour", h12: "12-hour (AM/PM)", seconds: "Seconds", showSeconds: "Show seconds", weekday: "Weekday", wLong: "Long (Sunday)", wShort: "Short (Sun)", wNone: "Hide", dateFmt: "Date format", dMid: "4 Oct 2026 (month name)", dLong: "4 October 2026 (full month)", dDm: "4 October (no year)", week: "Week number", showWeek: "Show week number (W40)", caps: "Names", capsOpt: "Capitalize weekday and month",
 				hwinfo: "HWiNFO", hwinfoNote: "CPU and GPU readings come from HWiNFO: enable Shared Memory Support in its Settings. The free version turns it off after ~12 h – just enable it again.", show: "Show", showCpu: "CPU temperature", showGpu: "GPU temperature", showRam: "RAM usage", unit: "Unit",
 				progress: "Show", pDay: "Day", pWeek: "Week", pMonth: "Month", pYear: "Year",
-				cdLabel: "Event name", cdDate: "Date and time", msg: "Message", msgPh: "Type something…", scroll: "Scroll speed", sNormal: "Normal", sSlow: "Slow", sFast: "Fast",
 			},
 			pl: {
-				panelLang: "Język panelu", mode: "Tryb", modeClock: "Zegar", modeDual: "Dwie strefy czasowe", modeStats: "Zegar + odczyty", modeDash: "Pulpit (wskaźniki)", modeAnalog: "Zegar analogowy", modeProgress: "Postęp (dzień / tydzień / miesiąc / rok)", modeCountdown: "Odliczanie", modeMessage: "Napis (przewijany)",
+				panelLang: "Język panelu", mode: "Tryb", modeClock: "Zegar", modeDual: "Dwie strefy czasowe", modeStats: "Zegar + odczyty", modeDash: "Pulpit (wskaźniki)", modeAnalog: "Zegar analogowy", modeProgress: "Postęp (dzień / tydzień / miesiąc / rok)",
 				theme: "Motyw", font: "Czcionka", refresh: "Częstotliwość odświeżania", rAuto: "Automatyczna", rSec: "na sekundę", sensorEvery: "Odświeżanie odczytów", sEvery: "co", accent: "Kolor akcentu", accentTheme: "Z motywu", accentCustom: "Własny", accentPick: "Wybierz kolor",
 				dateLang: "Język daty", langSystem: "Język systemu", tz: "Strefa czasowa", tzLocal: "Lokalna (systemowa)", tzCustom: "Inna (wpisz poniżej)…", customTz: "Nazwa strefy", tz2: "Druga strefa czasowa", customTz2: "Nazwa drugiej strefy", label1: "Podpis po lewej", label2: "Podpis po prawej", labelHint: "Opcjonalnie – domyślnie miasto",
 				hour: "Godziny", h24: "24-godzinny", h12: "12-godzinny (AM/PM)", seconds: "Sekundy", showSeconds: "Pokaż sekundy", weekday: "Dzień tygodnia", wLong: "Pełny (niedziela)", wShort: "Skrót (niedz.)", wNone: "Ukryj", dateFmt: "Format daty", dMid: "4 paź 2026 (nazwa miesiąca)", dLong: "4 października 2026 (pełna nazwa)", dDm: "4 października (bez roku)", week: "Numer tygodnia", showWeek: "Pokaż numer tygodnia (W40)", caps: "Nazwy", capsOpt: "Wielka litera w dniu tygodnia i miesiącu",
 				hwinfo: "HWiNFO", hwinfoNote: "Odczyty CPU i GPU pochodzą z HWiNFO: włącz Obsługę pamięci współdzielonej w jego ustawieniach. Darmowa wersja wyłącza ją po ok. 12 h – wystarczy włączyć ją ponownie.", show: "Pokaż", showCpu: "Temperaturę CPU", showGpu: "Temperaturę GPU", showRam: "Zajętość RAM", unit: "Jednostka",
 				progress: "Pokaż", pDay: "Dzień", pWeek: "Tydzień", pMonth: "Miesiąc", pYear: "Rok",
-				cdLabel: "Nazwa wydarzenia", cdDate: "Data i godzina", msg: "Napis", msgPh: "Wpisz coś…", scroll: "Szybkość przewijania", sNormal: "Normalna", sSlow: "Wolna", sFast: "Szybka",
 			},
 		};
 		var langChoice = "auto";
@@ -39,6 +37,17 @@
 		</select>
 	</sdpi-item>
 
+	<sdpi-item label="LED test (temporary)">
+		<sdpi-select setting="ledTest" default="0">
+			<option value="0">0 - normal</option>
+			<option value="1">1 - 2 px red line at the bottom edge</option>
+			<option value="2">2 - 2 px red frame</option>
+			<option value="3">3 - whole background red</option>
+			<option value="4">4 - red color in the layout file</option>
+			<option value="5">5 - no color at all (white/gray only)</option>
+			<option value="6">6 - one 3x3 px red dot in the corner</option>
+		</sdpi-select>
+	</sdpi-item>
 	<sdpi-item label="__MSG_mode__">
 		<sdpi-select setting="mode" default="clock">
 			<option value="clock">__MSG_modeClock__</option>
@@ -47,8 +56,6 @@
 			<option value="dashboard">__MSG_modeDash__</option>
 			<option value="analog">__MSG_modeAnalog__</option>
 			<option value="progress">__MSG_modeProgress__</option>
-			<option value="countdown">__MSG_modeCountdown__</option>
-			<option value="message">__MSG_modeMessage__</option>
 		</sdpi-select>
 	</sdpi-item>
 	<sdpi-item label="__MSG_theme__">
@@ -251,23 +258,7 @@
 		<sdpi-checkbox setting="progYear" default="true" label="__MSG_pYear__"></sdpi-checkbox>
 	</sdpi-item>
 
-	<sdpi-item label="__MSG_cdLabel__" data-modes="countdown">
-		<sdpi-textfield setting="targetLabel" maxlength="30"></sdpi-textfield>
-	</sdpi-item>
-	<sdpi-item label="__MSG_cdDate__" data-modes="countdown">
-		<sdpi-calendar setting="targetDate" type="datetime-local"></sdpi-calendar>
-	</sdpi-item>
 
-	<sdpi-item label="__MSG_msg__" data-modes="message">
-		<sdpi-textfield setting="message" maxlength="200" placeholder="__MSG_msgPh__"></sdpi-textfield>
-	</sdpi-item>
-	<sdpi-item label="__MSG_scroll__" data-modes="message">
-		<sdpi-select setting="scroll" default="normal">
-			<option value="normal">__MSG_sNormal__</option>
-			<option value="slow">__MSG_sSlow__</option>
-			<option value="fast">__MSG_sFast__</option>
-		</sdpi-select>
-	</sdpi-item>
 
 	<script>
 		// language picker: remember the choice and reload so every label is rebuilt in the new language
@@ -301,8 +292,11 @@
 				});
 			};
 			var client = SDPIComponents.streamDeckClient;
-			client.getSettings().then(function (e) { apply(e.payload.settings); });
+			var refresh = function () { client.getSettings().then(function (e) { apply(e.payload.settings); }); };
+			refresh();
 			client.didReceiveSettings.subscribe(function (e) { apply(e.payload.settings); });
+			// zmiana dowolnego pola: pobierz ustawienia ponownie i przelicz widoczność (zaraz i po chwili, gdy zapis już dotarł)
+			["change", "input", "click"].forEach(function (ev) { document.addEventListener(ev, function () { setTimeout(refresh, 80); setTimeout(refresh, 400); }, true); });
 		} catch (err) { console.error(err); }
 	</script>
 </body>

@@ -1,4 +1,4 @@
-export type Mode = "clock" | "dual" | "stats" | "dashboard" | "analog" | "progress" | "countdown" | "message";
+export type Mode = "clock" | "dual" | "stats" | "dashboard" | "analog" | "progress";
 
 /** Ustawienia akcji Infobar zapisywane przez panel. */
 export type Settings = {
@@ -22,6 +22,9 @@ export type Settings = {
 	showWeek?: boolean;
 	capitalize?: boolean;
 
+	// TYMCZASOWY test koloru bocznych kresek (do usunięcia)
+	ledTest?: string;
+
 	// wygląd i szybkość
 	font?: string;
 	fps?: string;
@@ -39,13 +42,7 @@ export type Settings = {
 	progMonth?: boolean;
 	progYear?: boolean;
 
-	// odliczanie
-	targetLabel?: string;
-	targetDate?: string;
 
-	// napis
-	message?: string;
-	scroll?: "slow" | "normal" | "fast";
 };
 
 export type Val = { temp: number } | null;

@@ -5,7 +5,7 @@
   "Name": "Elemental Infobar",
   "Version": "0.1.0.0",
   "Author": "Rafał",
-  "Description": "Clock, world clocks, system readings, countdown, progress and more for the Stream Deck Neo infobar, with themes and your own language.",
+  "Description": "Clock, world clocks, system readings, progress and more for the Stream Deck Neo infobar, with themes and your own language.",
   "Icon": "imgs/plugin-icon",
   "Category": "Elemental Infobar",
   "CategoryIcon": "imgs/category-icon",
@@ -26,7 +26,7 @@
     {
       "UUID": "com.elemental.infobar.bar",
       "Name": "Infobar",
-      "Tooltip": "Clock, readings, countdown and more on the Stream Deck Neo infobar.",
+      "Tooltip": "Clock, readings and more on the Stream Deck Neo infobar.",
       "Icon": "imgs/action-icon",
       "PropertyInspectorPath": "ui/infobar.html",
       "Controllers": [

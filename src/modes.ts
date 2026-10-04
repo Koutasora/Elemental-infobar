@@ -96,17 +96,17 @@ function ring(cx: number, cy: number, r: number, frac: number, color: string, tr
 		(frac > 0 ? `<path d="M${x0} ${y0} A${r} ${r} 0 ${end - 135 > 180 ? 1 : 0} 1 ${x1} ${y1}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>` : "");
 }
 
-const TEXTS: Record<string, { day: string; week: string; month: string; year: string; d: string; done: string; pick: string; msg: string }> = {
-	en: { day: "DAY", week: "WEEK", month: "MONTH", year: "YEAR", d: "d", done: "Time's up", pick: "Pick a date in settings", msg: "Type a message in settings" },
-	pl: { day: "DZIEŃ", week: "TYDZIEŃ", month: "MIESIĄC", year: "ROK", d: "d", done: "Czas minął", pick: "Wybierz datę w ustawieniach", msg: "Wpisz tekst w ustawieniach" },
-	de: { day: "TAG", week: "WOCHE", month: "MONAT", year: "JAHR", d: "T", done: "Zeit abgelaufen", pick: "Datum in den Einstellungen wählen", msg: "Text in den Einstellungen eingeben" },
-	fr: { day: "JOUR", week: "SEMAINE", month: "MOIS", year: "ANNÉE", d: "j", done: "Terminé", pick: "Choisissez une date", msg: "Saisissez un message" },
-	es: { day: "DÍA", week: "SEMANA", month: "MES", year: "AÑO", d: "d", done: "Tiempo agotado", pick: "Elige una fecha", msg: "Escribe un mensaje" },
-	it: { day: "GIORNO", week: "SETTIMANA", month: "MESE", year: "ANNO", d: "g", done: "Tempo scaduto", pick: "Scegli una data", msg: "Scrivi un messaggio" },
-	cs: { day: "DEN", week: "TÝDEN", month: "MĚSÍC", year: "ROK", d: "d", done: "Čas vypršel", pick: "Vyberte datum", msg: "Napište zprávu" },
-	pt: { day: "DIA", week: "SEMANA", month: "MÊS", year: "ANO", d: "d", done: "Tempo esgotado", pick: "Escolha uma data", msg: "Escreva uma mensagem" },
-	nl: { day: "DAG", week: "WEEK", month: "MAAND", year: "JAAR", d: "d", done: "Tijd om", pick: "Kies een datum", msg: "Typ een bericht" },
-	uk: { day: "ДЕНЬ", week: "ТИЖДЕНЬ", month: "МІСЯЦЬ", year: "РІК", d: "д", done: "Час вийшов", pick: "Оберіть дату", msg: "Введіть текст" },
+const TEXTS: Record<string, { day: string; week: string; month: string; year: string }> = {
+	en: { day: "DAY", week: "WEEK", month: "MONTH", year: "YEAR" },
+	pl: { day: "DZIEŃ", week: "TYDZIEŃ", month: "MIESIĄC", year: "ROK" },
+	de: { day: "TAG", week: "WOCHE", month: "MONAT", year: "JAHR" },
+	fr: { day: "JOUR", week: "SEMAINE", month: "MOIS", year: "ANNÉE" },
+	es: { day: "DÍA", week: "SEMANA", month: "MES", year: "AÑO" },
+	it: { day: "GIORNO", week: "SETTIMANA", month: "MESE", year: "ANNO" },
+	cs: { day: "DEN", week: "TÝDEN", month: "MĚSÍC", year: "ROK" },
+	pt: { day: "DIA", week: "SEMANA", month: "MÊS", year: "ANO" },
+	nl: { day: "DAG", week: "WEEK", month: "MAAND", year: "JAAR" },
+	uk: { day: "ДЕНЬ", week: "ТИЖДЕНЬ", month: "МІСЯЦЬ", year: "РІК" },
 };
 const words = (c: Ctx) => TEXTS[resolveLang(c.s.clockLang).split("-")[0]] ?? TEXTS.en;
 
@@ -299,38 +299,6 @@ function progressMode(c: Ctx): string {
 	return wrap(c, out);
 }
 
-// ---------------------------------------------------------------- odliczanie
-function countdownMode(c: Ctx): string {
-	const { s, t, accent } = c;
-	const w = words(c);
-	const label = s.targetLabel?.trim() || "";
-	const target = s.targetDate ? new Date(s.targetDate) : null;
-	if (!target || Number.isNaN(+target)) return wrap(c, tx(116, 30, w.pick, fit(w.pick, 216, 14), t.dim, 600, "middle"));
-	let diff = Math.floor((+target - +c.now) / 1000);
-	if (diff <= 0) return wrap(c, tx(116, 20, label || "—", fit(label || "—", 216, 14), accent, 700, "middle") + tx(116, 42, w.done, fit(w.done, 216, 22), t.fg, 700, "middle"));
-	const d = Math.floor(diff / 86400);
-	diff -= d * 86400;
-	const hh = String(Math.floor(diff / 3600)).padStart(2, "0");
-	const mm = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
-	const ss = String(diff % 60).padStart(2, "0");
-	const big = d > 0 ? `${d}${w.d} ${hh}:${mm}:${ss}` : `${hh}:${mm}:${ss}`;
-	return wrap(c, (label ? tx(116, 15, label, fit(label, 216, 13), accent, 700, "middle") : "") + tx(116, label ? 42 : 36, big, fit(big, 220, label ? 26 : 32), t.fg, 700, "middle"));
-}
-
-// ---------------------------------------------------------------- napis
-function messageMode(c: Ctx): string {
-	const { s, t, accent } = c;
-	const msg = (s.message ?? "").replace(/\s+/g, " ").trim();
-	if (!msg) return wrap(c, tx(116, 30, words(c).msg, fit(words(c).msg, 216, 14), t.dim, 600, "middle"));
-	const size = 26;
-	const width = tw(msg, size);
-	if (width <= 220) return wrap(c, tx(116, 35, msg, size, accent, 700, "middle"));
-	const speed = s.scroll === "slow" ? 25 : s.scroll === "fast" ? 90 : 50; // px/s
-	const gap = 70;
-	const offset = ((c.ms / 1000) * speed) % (width + gap);
-	return wrap(c, tx(6 - offset, 35, msg, size, accent, 700) + tx(6 - offset + width + gap, 35, msg, size, accent, 700));
-}
-
 export function renderMode(mode: Mode, c: Ctx): string {
 	useFont(c.s);
 	switch (mode) {
@@ -339,8 +307,6 @@ export function renderMode(mode: Mode, c: Ctx): string {
 		case "dashboard": return dashboardMode(c);
 		case "analog": return analogMode(c);
 		case "progress": return progressMode(c);
-		case "countdown": return countdownMode(c);
-		case "message": return messageMode(c);
 		default: return clockMode(c);
 	}
 }
