@@ -205,15 +205,18 @@ function statsMode(c: Ctx): string {
 	const big = p.ampm ? `${p.time}${p.ampm.toLowerCase()}` : p.time;
 	let out = tx(6, 30, big, fit(big, 92, 30), t.fg, 700) + tx(6, 45, `${p.weekdayShort} ${p.dateCompact}`, fit(`${p.weekdayShort} ${p.dateCompact}`, 92, 11), accent, 600);
 	const rows = sensorRows(c);
-	const n = Math.max(1, rows.length);
-	const rowH = 16;
-	const top = (50 - n * rowH) / 2;
-	rows.forEach((r, i) => {
-		const base = Math.round(top + i * rowH + 12);
+	// komunikat o braku HWiNFO ma kilka linii (po 13 px), zwykły wiersz odczytu ma 16 px
+	const heightOf = (r: Row) => ("msg" in r ? r.msg.length * 13 : 16);
+	const total = rows.reduce((sum, r) => sum + heightOf(r), 0);
+	let y = Math.max(0, (48 - total) / 2); // zostaje miejsce na linię diod przy dolnej krawędzi
+	rows.forEach((r) => {
+		const rowY = Math.round(y);
+		y += heightOf(r);
 		if ("msg" in r) {
-			r.msg.forEach((line, k) => (out += tx(106, base + k * 13 - (r.msg.length - 1) * 6, line, 12, k === 0 ? accent : t.dim, 700)));
+			r.msg.forEach((line, k) => (out += tx(106, rowY + 11 + k * 13, line, 12, k === 0 ? accent : t.dim, 700)));
 			return;
 		}
+		const base = rowY + 12;
 		out += tx(106, base, r.label, 10, t.dim, 700, "start", 0.5) + tx(146, base, r.text, 13, r.color, 700);
 		out += `<rect x="184" y="${base - 8}" width="42" height="6" rx="3" fill="${t.track}"/><rect x="184" y="${base - 8}" width="${Math.max(4, Math.round(42 * Math.max(0, Math.min(1, r.frac))))}" height="6" rx="3" fill="${r.color}"/>`;
 	});
