@@ -16,6 +16,7 @@
     "@elgato/cli": "*",
     "@types/node": "*",
     "esbuild": "*",
+    "opentype.js": "^2.0.0",
     "typescript": "*"
   }
 }

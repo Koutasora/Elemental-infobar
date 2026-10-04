@@ -10,9 +10,18 @@
   "Category": "Elemental Infobar",
   "CategoryIcon": "imgs/category-icon",
   "CodePath": "bin/plugin.js",
-  "Nodejs": { "Version": "20" },
-  "OS": [{ "Platform": "windows", "MinimumVersion": "10" }],
-  "Software": { "MinimumVersion": "7.6" },
+  "Nodejs": {
+    "Version": "20"
+  },
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Software": {
+    "MinimumVersion": "7.6"
+  },
   "Actions": [
     {
       "UUID": "com.elemental.infobar.bar",
@@ -20,8 +29,15 @@
       "Tooltip": "Clock, readings, countdown and more on the Stream Deck Neo infobar.",
       "Icon": "imgs/action-icon",
       "PropertyInspectorPath": "ui/infobar.html",
-      "Controllers": ["Neo"],
-      "States": [{ "Image": "imgs/key-default", "ShowTitle": false }]
+      "Controllers": [
+        "Neo"
+      ],
+      "States": [
+        {
+          "Image": "imgs/key-default",
+          "ShowTitle": false
+        }
+      ]
     }
   ]
 }

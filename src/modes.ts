@@ -1,5 +1,7 @@
 import type { Mode, Sensors, Settings, Val } from "./types";
 import { cityOf, clockParts, resolveLang, resolveTz, zoned } from "./clock";
+import { covers, findBundled, glyphRun, measure } from "./glyphs";
+import METRICS from "./metrics.json";
 
 export type Theme = { name: string; bg: [string, string]; fg: string; dim: string; accent: string; track: string };
 
@@ -15,59 +17,67 @@ export const THEMES: Record<string, Theme> = {
 
 export type Ctx = { now: Date; s: Settings; t: Theme; accent: string; sensors: Sensors; ms: number; smooth?: boolean };
 
-/** Znane czcionki: stos CSS i współczynnik szerokości (względem Segoe UI) do dopasowywania tekstu. */
-export const FONTS: Record<string, { css: string; scale: number; mono?: boolean }> = {
-	"Segoe UI": { css: "'Segoe UI', Arial, sans-serif", scale: 1 },
-	Arial: { css: "Arial, 'Segoe UI', sans-serif", scale: 0.98 },
-	Bahnschrift: { css: "Bahnschrift, 'Segoe UI', sans-serif", scale: 0.92 },
-	Calibri: { css: "Calibri, 'Segoe UI', sans-serif", scale: 0.9 },
-	Cambria: { css: "Cambria, Georgia, serif", scale: 1.02 },
-	Consolas: { css: "Consolas, 'Courier New', monospace", scale: 1.0, mono: true },
-	"Courier New": { css: "'Courier New', monospace", scale: 1.06, mono: true },
-	Georgia: { css: "Georgia, serif", scale: 1.15 },
-	Impact: { css: "Impact, 'Arial Narrow', sans-serif", scale: 0.86 },
-	"Lucida Console": { css: "'Lucida Console', monospace", scale: 1.08, mono: true },
-	Tahoma: { css: "Tahoma, 'Segoe UI', sans-serif", scale: 1.1 },
-	"Trebuchet MS": { css: "'Trebuchet MS', 'Segoe UI', sans-serif", scale: 1.04 },
-	Verdana: { css: "Verdana, 'Segoe UI', sans-serif", scale: 1.27 },
-	"Comic Sans MS": { css: "'Comic Sans MS', 'Segoe UI', sans-serif", scale: 1.12 },
-};
+/** Szerokości znaków czcionek systemowych (jednostki 1000/em, tekst zwykły i pogrubiony) – patrz scripts/gen-metrics.mjs. */
+const M = METRICS as Record<string, { regular: Record<string, number>; bold: Record<string, number> }>;
 
-let fontCss = FONTS["Segoe UI"].css;
-let fontScale = 1;
-let fontMono = false;
+/** Czcionki systemowe z listy w panelu: stos CSS (kolejne nazwy to zapasowe). */
+export const FONTS: Record<string, string> = {
+	"Segoe UI": "'Segoe UI', Arial, sans-serif",
+	Arial: "Arial, 'Segoe UI', sans-serif",
+	Bahnschrift: "Bahnschrift, 'Segoe UI', sans-serif",
+	Tahoma: "Tahoma, 'Segoe UI', sans-serif",
+	"Trebuchet MS": "'Trebuchet MS', 'Segoe UI', sans-serif",
+};
+const MONO_CSS = "'Cascadia Mono', Consolas, 'Courier New', monospace"; // tekst, którego nie ma w dołączonej czcionce
+
+let fontCss = FONTS["Segoe UI"];
+let metricName: string | null = "Segoe UI"; // czcionka z tabeli szerokości (dokładny układ)
+let fontScale = 1; // zapas dla czcionek wpisanych ręcznie (nieznane proporcje)
+let bundledId: string | null = null; // czcionka dołączona do pluginu (rysowana jako ścieżki)
 
 /** Ustawia czcionkę na czas jednego renderowania (render jest synchroniczny). */
 function useFont(s: Settings): void {
 	const raw = s.font === "custom" ? (s.customFont ?? "") : (s.font ?? "Segoe UI");
 	const name = raw.replace(/[^\p{L}\p{N} .\-]/gu, "").trim().slice(0, 40);
-	const known = FONTS[name];
-	if (known) {
-		fontCss = known.css;
-		fontScale = known.scale;
-		fontMono = known.mono === true;
+	const bundled = findBundled(name);
+	bundledId = bundled ?? null;
+	fontScale = 1;
+	if (bundled) {
+		fontCss = MONO_CSS;
+		metricName = null;
+	} else if (FONTS[name] && M[name]) {
+		fontCss = FONTS[name];
+		metricName = name;
 	} else if (name) {
 		fontCss = `'${name}', 'Segoe UI', Arial, sans-serif`; // dowolna zainstalowana czcionka
+		metricName = null;
 		fontScale = 1.12; // zapas na nieznane proporcje
-		fontMono = false;
 	} else {
-		fontCss = FONTS["Segoe UI"].css;
-		fontScale = 1;
-		fontMono = false;
+		fontCss = FONTS["Segoe UI"];
+		metricName = "Segoe UI";
 	}
 }
 const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-/** Przybliżona szerokość tekstu: cyfry ~0.57 em, dwukropek/kropka ~0.3 em, reszta ~0.58 em. */
-function tw(v: string, size: number): number {
+/** Szerokość tekstu: dokładna dla czcionek dołączonych i z tabeli, szacunkowa dla wpisanych ręcznie. */
+function tw(v: string, size: number, bold = true): number {
+	if (bundledId && covers(bundledId, v, bold)) return measure(bundledId, v, size, bold);
+	if (metricName) {
+		const t = M[metricName][bold ? "bold" : "regular"];
+		let w = 0;
+		for (const ch of v) w += t[ch] ?? 560;
+		return (w * size) / 1000;
+	}
+	if (bundledId) return v.length * 0.6 * size; // zapasowa czcionka o stałej szerokości
 	let w = 0;
-	for (const ch of v) w += /[0-9]/.test(ch) ? 0.57 : /[:.,; ]/.test(ch) ? (fontMono ? 0.58 : 0.3) : 0.58;
+	for (const ch of v) w += /[0-9]/.test(ch) ? 0.57 : /[:.,; ]/.test(ch) ? 0.3 : 0.58;
 	return w * size * fontScale;
 }
 /** Największy rozmiar czcionki (do maxSize), przy którym tekst mieści się w maxW. */
 const fit = (v: string, maxW: number, maxSize: number) => Math.max(7, Math.min(maxSize, Math.floor(maxW / (tw(v, 1) || 1))));
 
 function tx(x: number, y: number, v: string, size: number, fill: string, weight = 400, anchor: "start" | "middle" | "end" = "start", spacing = 0): string {
+	if (bundledId && covers(bundledId, v, weight >= 600)) return glyphRun(bundledId, v, size, weight >= 600, x, y, fill, anchor, spacing).svg;
 	return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="${fontCss}" font-size="${size}" font-weight="${weight}" fill="${fill}"${spacing ? ` letter-spacing="${spacing}"` : ""}>${esc(v)}</text>`;
 }
 
@@ -111,22 +121,39 @@ const TEXTS: Record<string, { day: string; week: string; month: string; year: st
 const words = (c: Ctx) => TEXTS[resolveLang(c.s.clockLang).split("-")[0]] ?? TEXTS.en;
 
 // ---------------------------------------------------------------- zegar
+type Seg = { text: string; size: number; fill: string; weight: number; gap: number };
+
+/**
+ * Kilka segmentów w jednej linii (godzina, AM/PM, sekundy), każdy jako osobny element w obliczonym miejscu.
+ * Czcionka dołączona: dokładne szerokości z danych znaków; systemowa z listy: dokładne szerokości z tabeli.
+ */
+function run(x: number, y: number, segs: Seg[]): { svg: string; end: number } {
+	let cx = x;
+	let svg = "";
+	for (const g of segs) {
+		cx += g.gap;
+		if (bundledId && covers(bundledId, g.text, g.weight >= 600)) {
+			const r = glyphRun(bundledId, g.text, g.size, g.weight >= 600, cx, y, g.fill);
+			svg += r.svg;
+			cx += r.width;
+		} else {
+			svg += `<text x="${cx.toFixed(1)}" y="${y}" text-anchor="start" font-family="${fontCss}" font-size="${g.size}" font-weight="${g.weight}" fill="${g.fill}">${esc(g.text)}</text>`;
+			cx += tw(g.text, g.size, g.weight >= 600);
+		}
+	}
+	return { svg, end: cx };
+}
+
 function clockMode(c: Ctx): string {
 	const { s, t, accent } = c;
 	const p = clockParts(c.now, s, resolveTz(s.tz, s.customTz));
 	const size = 38;
-	// godzina, AM/PM i sekundy w jednym napisie: sekundy zaczynają się zawsze tuż za ostatnią cyfrą, niezależnie od czcionki
-	let main = esc(p.time);
-	let after = 6 + tw(p.time, size);
-	if (p.ampm) {
-		main += `<tspan dx="4" font-size="13" font-weight="700" fill="${accent}">${p.ampm}</tspan>`;
-		after += 4 + tw(p.ampm, 13);
-	}
-	if (s.showSeconds === true) {
-		main += `<tspan dx="6" font-size="21" font-weight="700" fill="${accent}">${p.sec}</tspan>`;
-		after += 6 + tw(p.sec, 21);
-	}
-	let out = `<text x="6" y="38" font-family="${fontCss}" font-size="${size}" font-weight="700" fill="${t.fg}">${main}</text>`;
+	const segs: Seg[] = [{ text: p.time, size, fill: t.fg, weight: 700, gap: 0 }];
+	if (p.ampm) segs.push({ text: p.ampm, size: 13, fill: accent, weight: 700, gap: 4 });
+	if (s.showSeconds === true) segs.push({ text: p.sec, size: 21, fill: accent, weight: 700, gap: 6 });
+	const r = run(6, 38, segs);
+	let out = r.svg;
+	const after = r.end;
 	const rx = Math.max(124, Math.round(after + 14));
 	const rw = 230 - rx;
 	if (p.weekday) {
