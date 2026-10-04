@@ -4,13 +4,15 @@ import type { Sensors, Settings } from "./types";
 
 /**
  * Boczne diody Neo (dwie kreski przy pasku) przyjmują kolor z obrazu na pasku. Sprawdzone doświadczalnie: cienka linia
- * przy dolnej krawędzi zmienia ich kolor, a czarny, biały i szary są ignorowane i dają kolor domyślny (diod nie da się wyłączyć ani ustawić na biało). Dlatego sterujemy
+ * przy dolnej krawędzi zmienia ich kolor, a czarny, biały, szary i bladsze barwy są ignorowane (diod nie da się wyłączyć ani ustawić na biało), więc własny kolor wybieramy tylko z palety w pełni nasyconych barw. Dlatego sterujemy
  * wyłącznie diodami, kolorem takiej linii, i nie zmieniamy żadnego innego koloru na pasku (np. dnia tygodnia).
  */
 export type LedCtx = { s: Settings; now: Date; sensors: Sensors; ms: number };
 
-export const DEFAULT_LED = "#ff4d8d"; // kolor wpisywany do ustawień przy wyborze trybu "Własny kolor"
-const HEX = /^#[0-9a-f]{6}$/i;
+/** Kolory, które diody naprawdę przyjmują: w pełni nasycone, w pełnej jasności (biały, szary, czarny i pastele nie działają). */
+export const LED_COLORS = ["#ff0080","#ff0000","#ff8000","#ffff00","#80ff00","#00ff00","#00ff80","#00ffff","#0080ff","#0000ff","#8000ff","#ff00ff"];
+export const DEFAULT_LED = LED_COLORS[0]; // kolor wpisywany do ustawień przy wyborze trybu "Własny kolor"
+const valid = (v?: string) => (v && LED_COLORS.includes(v.toLowerCase()) ? v.toLowerCase() : null);
 
 const toRgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const toHex = (c: number[]) => "#" + c.map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join("");
@@ -32,10 +34,10 @@ const WEEK = ["#a855f7", "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", 
 /** Kolor linii sterującej diodami albo null (tryb automatyczny: nic nie rysujemy, diody robią co chcą). */
 export function ledColor(c: LedCtx): string | null {
 	const { s } = c;
-	const picked = HEX.test(s.ledColor ?? "") ? (s.ledColor as string) : DEFAULT_LED;
+	const picked = valid(s.ledColor) ?? DEFAULT_LED;
 	switch (s.ledMode) {
 		case "color":
-			return HEX.test(s.ledColor ?? "") ? (s.ledColor as string) : null; // czarny znaczy czarny (diody wracają do domyślnego)
+			return picked; // tylko kolory z palety
 		case "rainbow":
 			return toHex(hsl(((c.ms / 1000 / 24) % 1) * 360, 1, 0.5)); // pełny obrót barw co 24 s
 		case "pulse": {
