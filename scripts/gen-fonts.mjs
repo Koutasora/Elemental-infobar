@@ -19,7 +19,6 @@ const FAMILIES = {
 	"jetbrains-mono": { id: "JetBrains Mono", weights: { regular: 400, bold: 700 }, subsets: ["latin", "latin-ext", "cyrillic"] },
 	"iosevka": { id: "Iosevka", weights: { regular: 400, bold: 700 }, subsets: ["latin"] }, // jeden plik pokrywa wszystkie zakresy
 	"vt323": { id: "VT323", weights: { regular: 400 }, subsets: ["latin", "latin-ext"] }, // pikselowa, bez wersji pogrubionej
-	"press-start-2p": { id: "Press Start 2P", weights: { regular: 400 }, subsets: ["latin", "latin-ext", "cyrillic"] }, // pikselowa, bez wersji pogrubionej
 	"ibm-plex-mono": { id: "IBM Plex Mono", weights: { regular: 400, bold: 700 }, subsets: ["latin", "latin-ext", "cyrillic"] },
 	"fira-code": { id: "Fira Code", weights: { regular: 400, bold: 700 }, subsets: ["latin", "latin-ext", "cyrillic"] },
 };

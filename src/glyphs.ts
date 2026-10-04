@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /**
- * Czcionki dołączone do pluginu (JetBrains Mono, Iosevka, Fira Code, IBM Plex Mono, VT323, Press Start 2P – licencja SIL OFL-1.1).
+ * Czcionki dołączone do pluginu (JetBrains Mono, Iosevka, Fira Code, IBM Plex Mono, VT323 – licencja SIL OFL-1.1).
  * Rysujemy je jako ścieżki SVG z kształtów znaków zapisanych w fonts/<nazwa>.json (patrz scripts/gen-fonts.mjs),
  * więc działają bez instalowania czegokolwiek i mają dokładną szerokość tekstu.
  * Znaki, których dana czcionka nie ma, nie są pożyczane z innej czcionki:
@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 type G = { a: number; d: string };
 type Face = { regular: Record<string, G>; bold?: Record<string, G> };
 
-export const BUNDLED_FONTS = ["JetBrains Mono", "Iosevka", "Fira Code", "IBM Plex Mono", "VT323", "Press Start 2P"];
+export const BUNDLED_FONTS = ["JetBrains Mono", "Iosevka", "Fira Code", "IBM Plex Mono", "VT323"];
 
 const here = dirname(fileURLToPath(import.meta.url));
 const DIRS = [join(here, "..", "fonts"), join(process.cwd(), "com.elemental.infobar.sdPlugin", "fonts")];
@@ -48,7 +48,7 @@ export function covers(id: string, text: string, bold = true): boolean {
 }
 
 /** Korekta rozmiaru czcionek, które przy tym samym rozmiarze wyglądają na dużo większe lub mniejsze od pozostałych. */
-const SCALE: Record<string, number> = { "Press Start 2P": 0.6, VT323: 1.25 };
+const SCALE: Record<string, number> = { VT323: 1.25 };
 const scaleOf = (id: string) => SCALE[id] ?? 1;
 
 /** Dokładna szerokość tekstu w pikselach. */
