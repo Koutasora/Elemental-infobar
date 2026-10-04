@@ -22,6 +22,10 @@ export type Settings = {
 	showWeek?: boolean;
 	capitalize?: boolean;
 
+	// boczne diody (kolor linii przy dolnej krawędzi)
+	ledMode?: string;
+	ledColor?: string;
+
 	// wygląd i szybkość
 	font?: string;
 	fps?: string;

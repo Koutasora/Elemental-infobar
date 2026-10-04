@@ -76,7 +76,7 @@ function wrap(c: Ctx, inner: string): string {
 }
 
 /** zielony -> bursztyn -> czerwony zależnie od progów (jak na klawiszach) */
-function autoColor(t: number, warn: number, crit: number): string {
+export function autoColor(t: number, warn: number, crit: number): string {
 	const lerp = (a: number, b: number, k: number) => Math.round(a + (b - a) * k);
 	const mix = (c1: number[], c2: number[], k: number) => `rgb(${c1.map((v, i) => lerp(v, c2[i], k)).join(",")})`;
 	const green = [52, 211, 153], amber = [251, 191, 36], red = [248, 82, 82];
@@ -149,7 +149,7 @@ function clockMode(c: Ctx): string {
 	if (p.weekday) {
 		out += tx(rx, 21, p.weekday, fit(p.weekday, rw, 19), accent, 700);
 		out += tx(rx, 39, p.date, fit(p.date, rw, 15), t.dim, 500);
-		if (s.showWeek) out += tx(rx, 49, p.week, 9, t.dim, 600, "start", 1);
+		if (s.showWeek) out += tx(rx, 46, p.week, 9, t.dim, 600, "start", 1);
 	} else {
 		out += tx(rx, 27, p.date, fit(p.date, rw, 20), accent, 700);
 		if (s.showWeek) out += tx(rx, 44, p.week, 13, t.dim, 600);
@@ -167,7 +167,7 @@ function dualMode(c: Ctx): string {
 		const big = p.ampm ? `${p.time} ${p.ampm}` : p.time;
 		return tx(cx, 11, label.toUpperCase(), fit(label, 104, 9), t.dim, 700, "middle", 1) +
 			tx(cx, 36, big, fit(big, 108, 30), t.fg, 700, "middle") +
-			tx(cx, 47, `${p.weekdayShort} ${p.dateCompact}`, 10, accent, 600, "middle");
+			tx(cx, 45, `${p.weekdayShort} ${p.dateCompact}`, 10, accent, 600, "middle");
 	};
 	return wrap(c,
 		col(58, s.label1?.trim() || cityOf(tz1), tz1) +
@@ -239,7 +239,7 @@ function dashboardMode(c: Ctx): string {
 	for (const r of rings) {
 		out += ring(x, 22, 14, r.frac, r.color, t.track, 4);
 		out += tx(x, 26, r.text.replace(/°[CF]$/, "°"), fit(r.text.replace(/°[CF]$/, "°"), 22, 12), t.fg, 700, "middle");
-		out += tx(x, 48, r.label, 9, t.dim, 700, "middle", 0.5);
+		out += tx(x, 46, r.label, 9, t.dim, 700, "middle", 0.5);
 		x += slotW;
 	}
 	return wrap(c, out);

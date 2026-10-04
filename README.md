@@ -31,13 +31,14 @@ Turns the infobar of the **Stream Deck Neo** (the small screen between the two t
 - **Time zone** from a list or any IANA name (e.g. `Europe/Vienna`); 24 h or 12 h; seconds; long / short / hidden weekday; eight date formats; ISO week number; capitalization of names
 - **Themes**: Black, Midnight, Aurora, Sunset, Forest, Mono, Paper, plus your own accent color
 - **Fonts**: Segoe UI, Arial, Bahnschrift, Tahoma and Trebuchet MS (these all render at a similar size), two monospaced fonts built into the plugin that need no installation – JetBrains Mono and Iosevka. A built-in font is used only for text it has all the glyphs for; anything else is drawn in a system font.
+- **Side lights** (the two lights next to the infobar): automatic, match the accent color, custom color, off, rainbow, pulsing, by CPU / GPU temperature, by time of day, by weekday, or red only when something runs too hot. The plugin sets them through the color of a thin 2 px line along the bottom edge of the picture.
 - **Refresh rate**: from 1 to 20 times per second (a smooth sweeping second hand on the analog clock); readings can be updated every 1, 2, 5 or 10 seconds
 - Readings: choose which of CPU / GPU / RAM to show and °C / °F
 - Settings panel language: English or Polish
 
 ## Good to know
 
-- The infobar is not a button: it only displays. The two touch points next to it are not programmable.
+- The infobar is not a button: it only displays. The two touch points next to it are not programmable (they only switch pages), but their lights follow the picture – see **Side lights**.
 - The plugin draws the whole infobar as one 232 × 50 px image, so colors and fonts are the same everywhere.
 - For the readings modes the plugin starts a small `powershell.exe` helper to read HWiNFO's shared memory. Locked-down PCs or aggressive antivirus software may block it. Nothing is sent over the network.
 - The free version of HWiNFO switches Shared Memory off after about 12 hours; the readings then show **Enable HWiNFO Shared Memory** – enable it again and they come back by themselves.

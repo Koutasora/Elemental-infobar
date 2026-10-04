@@ -1,7 +1,8 @@
 import streamDeck, { action, SingletonAction, WillAppearEvent, WillDisappearEvent, DidReceiveSettingsEvent, type NeoInfobarAction } from "@elgato/streamdeck";
 import { THEMES, renderMode } from "./modes";
 import { readCpu, readGpu, readRam, shmStatus } from "./sensors";
-import type { Mode, Sensors, Settings } from "./types";
+import { ledColor, ledStrip } from "./led";
+import type { Sensors, Settings } from "./types";
 
 type Entry = { bar: NeoInfobarAction<Settings>; settings: Settings; timer?: NodeJS.Timeout; last: string };
 
@@ -12,7 +13,8 @@ let sensorEveryS = 0;
 
 const DEFAULT_SENSOR_S = 2;
 const DEFAULT_ACCENT = "#38bdf8"; // taka sama wartość jak default próbnika koloru w panelu
-const needsSensors = (m?: Mode) => m === "stats" || m === "dashboard";
+/** Odczyty potrzebne w trybach z odczytami oraz w diodach zależnych od temperatury. */
+const needsSensors = (s: Settings) => s.mode === "stats" || s.mode === "dashboard" || s.ledMode === "temp" || s.ledMode === "alert";
 
 function frame(e: Entry): string {
 	const s = e.settings;
@@ -20,14 +22,19 @@ function frame(e: Entry): string {
 	// Własny kolor: domyślna wartość próbnika w panelu (#38bdf8) nie jest zapisywana, dopóki jej nie zmienisz – używamy jej od razu
 	const picked = /^#[0-9a-f]{6}$/i.test(s.accent ?? "") ? (s.accent as string) : DEFAULT_ACCENT;
 	const accent = s.accentMode === "custom" ? picked : t.accent;
-	return renderMode(s.mode ?? "clock", { now: new Date(), s, t, accent, sensors, ms: Date.now(), smooth: rateOf(s) > 1 });
+	const now = new Date();
+	const ms = Date.now();
+	const svg = renderMode(s.mode ?? "clock", { now, s, t, accent, sensors, ms, smooth: rateOf(s) > 1 });
+	const led = ledColor({ s, now, accent, sensors, ms });
+	return led ? svg.replace("</svg>", `${ledStrip(led)}</svg>`) : svg;
 }
 
 /** Liczba odświeżeń na sekundę: wybrana w panelu albo domyślnie 1. */
 function rateOf(s: Settings): number {
 	const n = Number(s.fps);
-	if (s.fps && s.fps !== "auto" && Number.isFinite(n) && n >= 1) return Math.min(30, n);
-	return 1;
+	const base = s.fps && s.fps !== "auto" && Number.isFinite(n) && n >= 1 ? Math.min(30, n) : 1;
+	// tęcza, pulsowanie i miganie alarmu potrzebują kilku klatek na sekundę, żeby wyglądały płynnie
+	return s.ledMode === "rainbow" || s.ledMode === "pulse" || s.ledMode === "alert" ? Math.max(base, 5) : base;
 }
 
 async function draw(id: string): Promise<void> {
@@ -55,7 +62,7 @@ async function refreshSensors(): Promise<void> {
 }
 
 function ensureSensorTimer(): void {
-	const users = [...bars.values()].filter((e) => needsSensors(e.settings.mode));
+	const users = [...bars.values()].filter((e) => needsSensors(e.settings));
 	// najkrótszy interwał ze wszystkich pasków, które potrzebują odczytów
 	const every = users.length ? Math.min(...users.map((e) => Math.max(1, Number(e.settings.sensorInterval) || DEFAULT_SENSOR_S))) : 0;
 	if (every === sensorEveryS && (every === 0) === !sensorTimer) return;
