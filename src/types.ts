@@ -22,9 +22,6 @@ export type Settings = {
 	showWeek?: boolean;
 	capitalize?: boolean;
 
-	// TYMCZASOWY test koloru bocznych kresek (do usunięcia)
-	ledTest?: string;
-
 	// wygląd i szybkość
 	font?: string;
 	fps?: string;

@@ -3,7 +3,7 @@ import { THEMES, renderMode } from "./modes";
 import { readCpu, readGpu, readRam, shmStatus } from "./sensors";
 import type { Mode, Sensors, Settings } from "./types";
 
-type Entry = { bar: NeoInfobarAction<Settings>; settings: Settings; timer?: NodeJS.Timeout; last: string; layout?: string };
+type Entry = { bar: NeoInfobarAction<Settings>; settings: Settings; timer?: NodeJS.Timeout; last: string };
 
 const bars = new Map<string, Entry>();
 let sensors: Sensors = { cpu: null, gpu: null, ram: null, status: "unknown" };
@@ -16,18 +16,11 @@ const needsSensors = (m?: Mode) => m === "stats" || m === "dashboard";
 
 function frame(e: Entry): string {
 	const s = e.settings;
-	const t = s.ledTest === "5" ? THEMES.mono : (THEMES[s.theme ?? "black"] ?? THEMES.black);
+	const t = THEMES[s.theme ?? "black"] ?? THEMES.black;
 	// Własny kolor: domyślna wartość próbnika w panelu (#38bdf8) nie jest zapisywana, dopóki jej nie zmienisz – używamy jej od razu
 	const picked = /^#[0-9a-f]{6}$/i.test(s.accent ?? "") ? (s.accent as string) : DEFAULT_ACCENT;
-	const accent = s.ledTest === "5" ? "#ffffff" : s.accentMode === "custom" ? picked : t.accent;
-	let svg = renderMode(s.mode ?? "clock", { now: new Date(), s, t, accent, sensors, ms: Date.now(), smooth: rateOf(s) > 1 });
-	// --- TYMCZASOWY test koloru bocznych kresek ---
-	const red = "#ff0000";
-	if (s.ledTest === "1") svg = svg.replace("</svg>", `<rect x="0" y="48" width="232" height="2" fill="${red}"/></svg>`);
-	else if (s.ledTest === "2") svg = svg.replace("</svg>", `<rect x="1" y="1" width="230" height="48" fill="none" stroke="${red}" stroke-width="2"/></svg>`);
-	else if (s.ledTest === "3") svg = svg.replace('<rect width="232" height="50" fill="url(#bg)"/>', `<rect width="232" height="50" fill="${red}"/>`);
-	else if (s.ledTest === "6") svg = svg.replace("</svg>", `<rect x="0" y="0" width="3" height="3" fill="${red}"/></svg>`);
-	return svg;
+	const accent = s.accentMode === "custom" ? picked : t.accent;
+	return renderMode(s.mode ?? "clock", { now: new Date(), s, t, accent, sensors, ms: Date.now(), smooth: rateOf(s) > 1 });
 }
 
 /** Liczba odświeżeń na sekundę: wybrana w panelu albo domyślnie 1. */
@@ -52,11 +45,6 @@ function schedule(id: string): void {
 	if (!e) return;
 	if (e.timer) clearInterval(e.timer);
 	e.last = "";
-	const layout = e.settings.ledTest === "4" ? "layouts/bar-led.json" : "layouts/bar.json";
-	if (e.layout !== layout) {
-		e.layout = layout;
-		void e.bar.setFeedbackLayout(layout).then(() => draw(id));
-	}
 	e.timer = setInterval(() => void draw(id), Math.round(1000 / rateOf(e.settings)));
 	void draw(id);
 }
@@ -88,7 +76,7 @@ class Infobar extends SingletonAction<Settings> {
 		await ev.action.setFeedbackLayout("layouts/bar.json");
 		// drugi zegar ma sensowną wartość domyślną, żeby panel nie pokazywał "lokalny" dwa razy
 		if (ev.payload.settings.tz2 === undefined) await ev.action.setSettings({ ...ev.payload.settings, tz2: "America/New_York" });
-		bars.set(ev.action.id, { bar: ev.action, settings: ev.payload.settings, last: "", layout: "layouts/bar.json" });
+		bars.set(ev.action.id, { bar: ev.action, settings: ev.payload.settings, last: "" });
 		schedule(ev.action.id);
 		ensureSensorTimer();
 	}
