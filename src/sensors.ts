@@ -37,7 +37,7 @@ export function readRam(): Reading {
 	return { temp: (used / total) * 100, name: `${(used / 1024 ** 3).toFixed(1)} / ${(total / 1024 ** 3).toFixed(0)} GB`, source: "os" };
 }
 
-const INTEGRATED = /radeon\(tm\) graphics|radeon graphics|\bvega\b.*graphics|intel.*(uhd|iris|hd graphics|arc graphics)/i;
+const INTEGRATED = /radeon\(tm\) graphics|radeon graphics|\bvega\b.*graphics|intel.*(uhd|iris|hd graphics|arc(\(tm\))? graphics)/i;
 
 /** GPU: HWiNFO pamięć współdzielona (karty po nazwie czujnika "GPU [#N]" / "iGPU [#N]" / "dGPU [#N]").
  *  Pasek ma jedno pole GPU: pierwsza karta dedykowana z temperaturą, a gdy jej brak (np. uśpiona w laptopie) – zintegrowana. */
