@@ -53,7 +53,7 @@ Messages shown in the readings modes instead of a value:
 
 ## Supported hardware
 
-Readings are matched by their HWiNFO labels, with priority lists for Intel (`CPU Package`), AMD (`CPU (Tctl/Tdie)`, `CPU PPT`) and for NVIDIA, AMD and Intel graphics (`GPU [#N]` sensors); the first graphics card is shown. RAM usage comes from the operating system. Developed and tested on Intel + NVIDIA; AMD and Radeon / Intel GPUs are supported through HWiNFO sensor names and are less tested. If a reading shows **--** although HWiNFO shows the sensor, the label probably differs – please open an issue and include the sensor name, or see `$rules` in `com.elemental.infobar.sdPlugin/bin/hwinfo-shm.ps1`.
+Readings are matched by their HWiNFO labels, with priority lists for Intel (`CPU Package`), AMD (`CPU (Tctl/Tdie)`, `CPU PPT`) and for NVIDIA, AMD and Intel graphics (`GPU [#N]` sensors, or `iGPU [#N]` / `dGPU [#N]` in newer HWiNFO versions). With two graphics cards (for example a laptop) the dedicated card is shown; the integrated one is used only when the dedicated card reports no temperature. RAM usage comes from the operating system. Developed and tested on Intel + NVIDIA; AMD and Radeon / Intel GPUs are supported through HWiNFO sensor names and are less tested. If a reading shows **--** although HWiNFO shows the sensor, the label probably differs – please open an issue and include the sensor name, or see `$rules` in `com.elemental.infobar.sdPlugin/bin/hwinfo-shm.ps1`.
 
 ## Good to know
 
