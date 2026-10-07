@@ -1,7 +1,7 @@
 # Czyta pamięć współdzieloną HWiNFO (Global\HWiNFO_SENS_SM2) i co 2 s wypisuje jedną linię JSON:
 #   {"status":"ok","cpu":{temp,load,power,clock},"gpu":{"0":{...},"1":{...}}}
 # Czujniki dobierane są po nazwach z list priorytetów (Intel / AMD / NVIDIA / Radeon / Intel GPU) – bierzemy pierwszy najlepiej pasujący.
-# Karty GPU rozpoznajemy po nazwie czujnika HWiNFO: "GPU [#N]: ...".
+# Karty GPU rozpoznajemy po nazwie czujnika HWiNFO: "GPU [#N]: ..." (albo "iGPU [#N]" / "dGPU [#N]").
 param([int]$ParentPid = 0)
 $ErrorActionPreference = 'SilentlyContinue'
 Add-Type -AssemblyName System.Core
@@ -16,9 +16,9 @@ $rules = @{
 	cpuPower = @(5, @('^CPU Package Power$', '^CPU PPT$', '^CPU Core Power$', '^Core Power$'))
 	cpuLoad  = @(7, @('^Total CPU Usage$', '^Total CPU Utility$'))
 	cpuClock = @(6, @('^Average Effective Clock$', '^Core Clocks? \(avg\)$', '^Average Clock$'))
-	gpuTemp  = @(1, @('^GPU Temperature$', '^GPU Core Temperature$', '^GPU Temperature \(Edge\)$', '^GPU Hot Spot Temperature$', '^GPU Hot Spot$'))
+	gpuTemp  = @(1, @('^GPU Temperature$', '^GPU Core Temperature$', '^GPU Temperature \(Edge\)$', '^GPU Hot Spot Temperature$', '^GPU Hot Spot$', '^GPU .*Temperature'))
 	gpuPower = @(5, @('^GPU Power$', '^GPU Total Board Power$', '^GPU ASIC Power$', '^GPU Chip Power$', '^GPU Core Power$'))
-	gpuLoad  = @(7, @('^GPU Core Load$', '^GPU Utilization$', '^GPU Core Utilization$', '^GPU D3D Usage$', '^GPU Usage$'))
+	gpuLoad  = @(7, @('^GPU Core Load$', '^GPU Utilization$', '^GPU Core Utilization$', '^GPU D3D Usage$', '^GPU Usage$', '^GPU .*(Load|Utili[sz]ation|Usage)'))
 	gpuClock = @(6, @('^GPU Clock$', '^GPU Core Clock$'))
 }
 $coreTempRe = '^(P-core |E-core |Core )\d+$'
@@ -42,13 +42,20 @@ while ($true) {
 		if ($v.ReadUInt32(0) -eq 0x53695748 -and $age -lt 15) {
 			# numer karty GPU dla każdego czujnika ($null = to nie jest czujnik GPU)
 			$so = $v.ReadUInt32(20); $ss = $v.ReadUInt32(24); $sn = $v.ReadUInt32(28)
-			$gpuOf = @{}
+			$gpuOf = @{}; $gpuIdx = @{}; $gpuInt = @{}
 			$gpuName = @{}; $diskOf = @{}; $diskName = @{}; $diskModel = @{}; $diskTemp = @{}; $diskCount = 0
 			for ($i = 0; $i -lt $sn; $i++) {
 				$sname = Str $v ($so + $i * $ss + 8) 128
-				if ($sname -match '^GPU \[#(\d+)\]') {
-					$gn = [int]$Matches[1]; $gpuOf[[uint32]$i] = $gn
-					if (-not $gpuName.ContainsKey($gn)) { $gpuName[$gn] = ((($sname -replace '^GPU \[#\d+\]: ', '') -split ':')[0] -replace '["\\]', '') }
+				if ($sname -match '^([A-Za-z]?GPU) \[#(\d+)\]') {
+					# "GPU [#N]" zachowuje numer N; "iGPU [#0]" / "dGPU [#0]" (nowsze HWiNFO) dostają kolejny wolny numer
+					$gk = $Matches[0]
+					if (-not $gpuIdx.ContainsKey($gk)) {
+						if ($Matches[1] -eq 'GPU') { $gn = [int]$Matches[2] } else { $gn = 0; while ($gpuName.ContainsKey($gn)) { $gn++ } }
+						$gpuIdx[$gk] = $gn
+						if ($Matches[1] -eq 'iGPU') { $gpuInt[$gn] = $true }
+						$gpuName[$gn] = ((($sname -replace '^[A-Za-z]?GPU \[#\d+\]: ', '') -split ':')[0] -replace '["\\]', '')
+					}
+					$gpuOf[[uint32]$i] = $gpuIdx[$gk]
 				}
 				elseif ($sname -match '^S\.M\.A\.R\.T\.: (.*)$') {
 					# dysk: litery z "[C:]" albo model sprzed " ("
@@ -99,7 +106,7 @@ while ($true) {
 				$gv = @{}
 				foreach ($c in 'gpuTemp', 'gpuPower', 'gpuLoad', 'gpuClock') { if ($best.ContainsKey("$c|$n")) { $gv[$c] = $best["$c|$n"][1] } }
 				$g = MakeGroup $gv 'gpu'
-				if ($g) { $g = $g.TrimEnd('}') + ',"name":"' + $gpuName[$n] + '"}'; $gpuJson += ('"' + $n + '":' + $g) }
+				if ($g) { $g = $g.TrimEnd('}') + ',"name":"' + $gpuName[$n] + '"' + $(if ($gpuInt[$n]) { ',"igpu":true' } else { '' }) + '}'; $gpuJson += ('"' + $n + '":' + $g) }
 			}
 			$diskJson = @()
 			foreach ($dn in ($diskTemp.Keys | Sort-Object)) { $diskJson += ('"' + $dn + '":{"temp":' + (Num $diskTemp[$dn]) + ',"name":"' + $diskName[$dn] + '","model":"' + $diskModel[$dn] + '"}') }

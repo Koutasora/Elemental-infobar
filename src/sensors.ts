@@ -8,7 +8,7 @@ import { freemem, totalmem } from "node:os";
 const run = promisify(execFile);
 
 /** `temp` to główna wartość odczytu: °C dla CPU/GPU/dysku, % dla RAM. `name` – krótka nazwa (np. litera dysku). */
-export type Reading = { temp: number; load?: number; power?: number; clock?: number; name?: string; model?: string; source: string };
+export type Reading = { temp: number; load?: number; power?: number; clock?: number; name?: string; model?: string; igpu?: boolean; source: string };
 
 export type ListItem = { label: string; value: string };
 
@@ -37,10 +37,15 @@ export function readRam(): Reading {
 	return { temp: (used / total) * 100, name: `${(used / 1024 ** 3).toFixed(1)} / ${(total / 1024 ** 3).toFixed(0)} GB`, source: "os" };
 }
 
-/** GPU: HWiNFO pamięć współdzielona (każda karta osobno, po nazwie czujnika "GPU [#N]"). */
-export async function readGpu(index = 0): Promise<Reading | null> {
+const INTEGRATED = /radeon\(tm\) graphics|radeon graphics|\bvega\b.*graphics|intel.*(uhd|iris|hd graphics|arc graphics)/i;
+
+/** GPU: HWiNFO pamięć współdzielona (karty po nazwie czujnika "GPU [#N]" / "iGPU [#N]" / "dGPU [#N]").
+ *  Pasek ma jedno pole GPU: pierwsza karta dedykowana z temperaturą, a gdy jej brak (np. uśpiona w laptopie) – zintegrowana. */
+export async function readGpu(): Promise<Reading | null> {
 	ensureShm();
-	return Date.now() - shmLast.at < 8000 ? (shmLast.gpus.get(index) ?? null) : null;
+	if (Date.now() - shmLast.at >= 8000) return null;
+	const cards = [...shmLast.gpus.entries()].sort((a, b) => a[0] - b[0]).map(([, r]) => r);
+	return cards.find((r) => !r.igpu && !INTEGRATED.test(r.name ?? "")) ?? cards[0] ?? null;
 }
 
 /** CPU: HWiNFO pamięć współdzielona -> HWiNFO rejestr ("Report value in Gadget") -> LibreHardwareMonitor (HTTP). */

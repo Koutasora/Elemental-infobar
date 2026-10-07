@@ -58,7 +58,7 @@ function schedule(id: string): void {
 }
 
 async function refreshSensors(): Promise<void> {
-	const [cpu, gpu] = await Promise.all([readCpu(), readGpu(0)]);
+	const [cpu, gpu] = await Promise.all([readCpu(), readGpu()]);
 	sensors = { cpu, gpu, ram: readRam(), status: shmStatus() };
 }
 
